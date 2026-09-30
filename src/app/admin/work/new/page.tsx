@@ -2,8 +2,10 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import AdminSidebar from '@/components/AdminSidebar';
-import { mockProjects } from '@/lib/mockData';
+import { createProject } from '@/lib/supabase';
+import { uploadProjectImage } from '@/lib/supabase-storage';
 
 export default function AdminNewWorkPage() {
   const router = useRouter();
@@ -15,12 +17,29 @@ export default function AdminNewWorkPage() {
   const [clientIndustry, setClientIndustry] = useState('');
   const [description, setDescription] = useState('');
   const [image, setImage] = useState('/images/brass-components.png');
+  const [uploading, setUploading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    const res = await uploadProjectImage(file);
+    if (res.success && res.url) {
+      setImage(res.url);
+    } else {
+      alert('Photo upload failed: ' + res.error);
+    }
+    setUploading(false);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitting(true);
+
     const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-    const newProject = {
-      id: `proj-${Date.now()}`,
+    await createProject({
       slug: slug || `project-${Date.now()}`,
       title,
       category,
@@ -32,15 +51,14 @@ export default function AdminNewWorkPage() {
       image,
       description,
       specs: [
-        { label: 'Outer Diameter', value: '40.00mm' },
-        { label: 'Surface Finish', value: 'Ra 0.4 µm' },
+        { label: 'Outer Diameter', value: '40.00mm ± 0.005' },
+        { label: 'Surface Finish', value: 'Ra 0.4 µm Ground' },
       ],
       featured: true,
-    };
+    });
 
-    mockProjects.unshift(newProject);
-    alert('New project added to catalog!');
-    router.push('/admin');
+    alert('New project published to catalog!');
+    router.push('/admin/work');
   };
 
   return (
@@ -133,33 +151,26 @@ export default function AdminNewWorkPage() {
             </div>
           </div>
 
-          <div className="flex flex-col gap-1">
+          {/* Photo Upload Section */}
+          <div className="flex flex-col gap-2 p-4 bg-surface-container-low rounded-xl border border-outline-variant/40">
             <label className="font-label-technical text-xs uppercase tracking-wider text-on-surface font-semibold">
-              Client Industry Sector
+              Project Photo (Upload to Supabase Storage or Select Asset)
             </label>
-            <input
-              type="text"
-              value={clientIndustry}
-              onChange={(e) => setClientIndustry(e.target.value)}
-              placeholder="e.g. Marine & Pump Manufacturing"
-              className="px-space-md py-space-sm rounded-lg bg-surface-container-low border border-outline-variant/60 focus:outline-none focus:border-primary text-on-surface font-body-md text-sm"
-            />
-          </div>
+            <div className="flex flex-col sm:flex-row items-center gap-4">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileUpload}
+                className="text-xs font-label-technical text-on-surface-variant file:mr-3 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-primary file:text-on-primary hover:file:bg-primary/90"
+              />
+              {uploading && <span className="font-label-technical text-xs text-primary">Uploading photo...</span>}
+            </div>
 
-          <div className="flex flex-col gap-1">
-            <label className="font-label-technical text-xs uppercase tracking-wider text-on-surface font-semibold">
-              Photo Asset Path
-            </label>
-            <select
-              value={image}
-              onChange={(e) => setImage(e.target.value)}
-              className="px-space-md py-space-sm rounded-lg bg-surface-container-low border border-outline-variant/60 focus:outline-none focus:border-primary text-on-surface font-body-md text-sm"
-            >
-              <option value="/images/brass-components.png">Brass Turned Components (/images/brass-components.png)</option>
-              <option value="/images/lathe-chuck.png">Lathe Chuck & Shaft (/images/lathe-chuck.png)</option>
-              <option value="/images/hero-macro-cnc.png">CNC Lathe Cutting (/images/hero-macro-cnc.png)</option>
-              <option value="/images/precision-craft.png">Tool Steel Craft (/images/precision-craft.png)</option>
-            </select>
+            {image && (
+              <div className="relative w-32 h-20 rounded-lg overflow-hidden border border-outline-variant/60 mt-2">
+                <Image src={image} alt="Preview" fill className="object-cover" />
+              </div>
+            )}
           </div>
 
           <div className="flex flex-col gap-1">
@@ -178,9 +189,10 @@ export default function AdminNewWorkPage() {
 
           <button
             type="submit"
-            className="w-full py-space-md rounded-full bg-primary text-on-primary font-headline-sm text-xs uppercase tracking-wider hover:bg-primary/90 transition-all shadow-md mt-2"
+            disabled={submitting}
+            className="w-full py-space-md rounded-full bg-primary text-on-primary font-headline-sm text-xs uppercase tracking-wider hover:bg-primary/90 transition-all shadow-md mt-2 disabled:opacity-50"
           >
-            Publish Project to Catalog
+            {submitting ? 'Publishing Project...' : 'Publish Project to Catalog'}
           </button>
         </form>
       </main>

@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import AdminSidebar from '@/components/AdminSidebar';
 import { getProjectById, updateProject } from '@/lib/supabase';
+import { uploadProjectImage } from '@/lib/supabase-storage';
 
 interface EditPageProps {
   params: {
@@ -14,6 +16,9 @@ interface EditPageProps {
 export default function AdminEditWorkPage({ params }: EditPageProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('Precision Turning');
   const [material, setMaterial] = useState('');
@@ -41,8 +46,23 @@ export default function AdminEditWorkPage({ params }: EditPageProps) {
     loadProject();
   }, [params.id]);
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    const res = await uploadProjectImage(file);
+    if (res.success && res.url) {
+      setImage(res.url);
+    } else {
+      alert('Photo upload failed: ' + res.error);
+    }
+    setUploading(false);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitting(true);
     await updateProject(params.id, {
       title,
       category,
@@ -155,32 +175,26 @@ export default function AdminEditWorkPage({ params }: EditPageProps) {
             </div>
           </div>
 
-          <div className="flex flex-col gap-1">
+          {/* Photo Upload Section */}
+          <div className="flex flex-col gap-2 p-4 bg-surface-container-low rounded-xl border border-outline-variant/40">
             <label className="font-label-technical text-xs uppercase tracking-wider text-on-surface font-semibold">
-              Client Industry Sector
+              Project Photo (Upload to Supabase Storage or Select Asset)
             </label>
-            <input
-              type="text"
-              value={clientIndustry}
-              onChange={(e) => setClientIndustry(e.target.value)}
-              className="px-space-md py-space-sm rounded-lg bg-surface-container-low border border-outline-variant/60 focus:outline-none focus:border-primary text-on-surface font-body-md text-sm"
-            />
-          </div>
+            <div className="flex flex-col sm:flex-row items-center gap-4">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileUpload}
+                className="text-xs font-label-technical text-on-surface-variant file:mr-3 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-primary file:text-on-primary hover:file:bg-primary/90"
+              />
+              {uploading && <span className="font-label-technical text-xs text-primary">Uploading photo...</span>}
+            </div>
 
-          <div className="flex flex-col gap-1">
-            <label className="font-label-technical text-xs uppercase tracking-wider text-on-surface font-semibold">
-              Photo Asset Path
-            </label>
-            <select
-              value={image}
-              onChange={(e) => setImage(e.target.value)}
-              className="px-space-md py-space-sm rounded-lg bg-surface-container-low border border-outline-variant/60 focus:outline-none focus:border-primary text-on-surface font-body-md text-sm"
-            >
-              <option value="/images/brass-components.png">Brass Turned Components (/images/brass-components.png)</option>
-              <option value="/images/lathe-chuck.png">Lathe Chuck & Shaft (/images/lathe-chuck.png)</option>
-              <option value="/images/hero-macro-cnc.png">CNC Lathe Cutting (/images/hero-macro-cnc.png)</option>
-              <option value="/images/precision-craft.png">Tool Steel Craft (/images/precision-craft.png)</option>
-            </select>
+            {image && (
+              <div className="relative w-32 h-20 rounded-lg overflow-hidden border border-outline-variant/60 mt-2">
+                <Image src={image} alt="Preview" fill className="object-cover" />
+              </div>
+            )}
           </div>
 
           <div className="flex flex-col gap-1">
@@ -199,9 +213,10 @@ export default function AdminEditWorkPage({ params }: EditPageProps) {
           <div className="flex items-center gap-4 mt-2">
             <button
               type="submit"
-              className="px-space-xl py-space-md rounded-full bg-primary text-on-primary font-headline-sm text-xs uppercase tracking-wider hover:bg-primary/90 transition-all shadow-md"
+              disabled={submitting}
+              className="px-space-xl py-space-md rounded-full bg-primary text-on-primary font-headline-sm text-xs uppercase tracking-wider hover:bg-primary/90 transition-all shadow-md disabled:opacity-50"
             >
-              Update Project Details
+              {submitting ? 'Updating...' : 'Update Project Details'}
             </button>
             <button
               type="button"

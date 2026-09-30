@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 
 function LoginForm() {
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -21,13 +22,13 @@ function LoginForm() {
       const res = await fetch('/api/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password }),
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await res.json();
 
       if (!res.ok || !data.success) {
-        setError(data.message || 'Invalid authorization key.');
+        setError(data.message || 'Invalid admin credentials.');
         setLoading(false);
         return;
       }
@@ -54,7 +55,7 @@ function LoginForm() {
           Admin Authentication
         </h1>
         <p className="font-body-md text-xs text-on-surface-variant">
-          Enter administrative key to access telemetry, RFQ submissions, and shop management.
+          Sign in with Supabase Owner Credentials or Admin Secret Key.
         </p>
       </div>
 
@@ -68,13 +69,26 @@ function LoginForm() {
       <form onSubmit={handleLogin} className="flex flex-col gap-space-md">
         <div className="flex flex-col gap-1">
           <label className="font-label-technical text-xs uppercase tracking-wider text-on-surface font-semibold">
-            Admin Access Key
+            Admin Email (Optional if using secret key)
+          </label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="admin@lathepattarai.com"
+            className="px-space-md py-space-sm rounded-lg bg-surface-container-low border border-outline-variant/60 focus:outline-none focus:border-primary text-on-surface font-body-md text-sm"
+          />
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label className="font-label-technical text-xs uppercase tracking-wider text-on-surface font-semibold">
+            Password / Admin Secret Key *
           </label>
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="Enter authorization key"
+            placeholder="Enter password or admin key"
             required
             className="px-space-md py-space-sm rounded-lg bg-surface-container-low border border-outline-variant/60 focus:outline-none focus:border-primary text-on-surface font-body-md text-sm"
           />
@@ -86,10 +100,10 @@ function LoginForm() {
           className="w-full py-space-md rounded-full bg-primary text-on-primary font-headline-sm text-xs uppercase tracking-wider hover:bg-primary/90 transition-all shadow-md flex items-center justify-center gap-2 mt-2 disabled:opacity-50"
         >
           {loading ? (
-            <span>Verifying Authorization...</span>
+            <span>Verifying Credentials...</span>
           ) : (
             <>
-              <span>Access Admin Portal</span>
+              <span>Sign In to Admin Portal</span>
               <span className="material-symbols-outlined text-base">lock_open</span>
             </>
           )}
