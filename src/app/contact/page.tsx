@@ -17,6 +17,7 @@ const enquirySchema = z.object({
   company: z.string().optional(),
   serviceType: z.string().min(1, 'Please select a machining service'),
   message: z.string().min(10, 'Please describe your component specs or tolerances'),
+  website_hp: z.string().optional(), // Honeypot field for anti-spam
 });
 
 type EnquiryFormData = z.infer<typeof enquirySchema>;
@@ -34,13 +35,28 @@ export default function ContactPage() {
     resolver: zodResolver(enquirySchema),
     defaultValues: {
       serviceType: 'Heavy Lathe Turning',
+      website_hp: '',
     },
   });
 
   const onSubmit = async (data: EnquiryFormData) => {
+    // Spam check: if honeypot is filled, discard silently
+    if (data.website_hp && data.website_hp.length > 0) {
+      setSubmittedId(`enq-${Date.now()}`);
+      reset();
+      return;
+    }
+
     setSubmitting(true);
     try {
-      const res = await createEnquiry(data);
+      const res = await createEnquiry({
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        company: data.company,
+        serviceType: data.serviceType,
+        message: data.message,
+      });
       setSubmittedId(res.id);
       reset();
     } catch (err) {
@@ -134,7 +150,7 @@ export default function ContactPage() {
             {/* Right RFQ Form */}
             <div className="lg:col-span-7">
               <div className="bg-surface-container-lowest p-space-xl rounded-2xl border border-outline-variant/60 shadow-md flex flex-col gap-space-md">
-                <div className="flex flex-col gap-1 border-b border-outline-variant/40 pb- space-md">
+                <div className="flex flex-col gap-1 border-b border-outline-variant/40 pb-space-md">
                   <h3 className="font-headline-sm text-2xl uppercase tracking-tight text-on-surface">
                     Submit Job Specifications
                   </h3>
@@ -161,6 +177,9 @@ export default function ContactPage() {
                   </div>
                 ) : (
                   <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-space-md">
+                    {/* Hidden Honeypot anti-spam field */}
+                    <input type="text" tabIndex={-1} autoComplete="off" className="hidden opacity-0 w-0 h-0 pointer-events-none" {...register('website_hp')} />
+
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-space-md">
                       {/* Name */}
                       <div className="flex flex-col gap-1">
@@ -171,7 +190,7 @@ export default function ContactPage() {
                           type="text"
                           {...register('name')}
                           placeholder="e.g. Ramesh Sundaram"
-                          className="px-space-md py- space-sm rounded-lg bg-surface-container-low border border-outline-variant/60 focus:outline-none focus:border-primary text-on-surface font-body-md text-sm"
+                          className="px-space-md py-space-sm rounded-lg bg-surface-container-low border border-outline-variant/60 focus:outline-none focus:border-primary text-on-surface font-body-md text-sm"
                         />
                         {errors.name && (
                           <span className="text-error font-label-technical text-[11px]">{errors.name.message}</span>
@@ -187,7 +206,7 @@ export default function ContactPage() {
                           type="tel"
                           {...register('phone')}
                           placeholder="+91 98765 43210"
-                          className="px-space-md py- space-sm rounded-lg bg-surface-container-low border border-outline-variant/60 focus:outline-none focus:border-primary text-on-surface font-body-md text-sm"
+                          className="px-space-md py-space-sm rounded-lg bg-surface-container-low border border-outline-variant/60 focus:outline-none focus:border-primary text-on-surface font-body-md text-sm"
                         />
                         {errors.phone && (
                           <span className="text-error font-label-technical text-[11px]">{errors.phone.message}</span>
@@ -205,7 +224,7 @@ export default function ContactPage() {
                           type="email"
                           {...register('email')}
                           placeholder="ramesh@company.com"
-                          className="px-space-md py- space-sm rounded-lg bg-surface-container-low border border-outline-variant/60 focus:outline-none focus:border-primary text-on-surface font-body-md text-sm"
+                          className="px-space-md py-space-sm rounded-lg bg-surface-container-low border border-outline-variant/60 focus:outline-none focus:border-primary text-on-surface font-body-md text-sm"
                         />
                         {errors.email && (
                           <span className="text-error font-label-technical text-[11px]">{errors.email.message}</span>
@@ -221,7 +240,7 @@ export default function ContactPage() {
                           type="text"
                           {...register('company')}
                           placeholder="e.g. Chennai Pump Dynamics"
-                          className="px-space-md py- space-sm rounded-lg bg-surface-container-low border border-outline-variant/60 focus:outline-none focus:border-primary text-on-surface font-body-md text-sm"
+                          className="px-space-md py-space-sm rounded-lg bg-surface-container-low border border-outline-variant/60 focus:outline-none focus:border-primary text-on-surface font-body-md text-sm"
                         />
                       </div>
                     </div>
@@ -233,7 +252,7 @@ export default function ContactPage() {
                       </label>
                       <select
                         {...register('serviceType')}
-                        className="px-space-md py- space-sm rounded-lg bg-surface-container-low border border-outline-variant/60 focus:outline-none focus:border-primary text-on-surface font-body-md text-sm"
+                        className="px-space-md py-space-sm rounded-lg bg-surface-container-low border border-outline-variant/60 focus:outline-none focus:border-primary text-on-surface font-body-md text-sm"
                       >
                         <option value="Heavy Lathe Turning">Heavy Lathe Shaft Turning</option>
                         <option value="Brass Component Fabrication">Brass Component & Sleeve Fabrication</option>
@@ -252,7 +271,7 @@ export default function ContactPage() {
                         rows={4}
                         {...register('message')}
                         placeholder="Detail raw material grade (e.g. SS316L, Brass C36000), required tolerances (e.g. ±0.005mm), batch quantity, and drawings..."
-                        className="px-space-md py- space-sm rounded-lg bg-surface-container-low border border-outline-variant/60 focus:outline-none focus:border-primary text-on-surface font-body-md text-sm"
+                        className="px-space-md py-space-sm rounded-lg bg-surface-container-low border border-outline-variant/60 focus:outline-none focus:border-primary text-on-surface font-body-md text-sm"
                       ></textarea>
                       {errors.message && (
                         <span className="text-error font-label-technical text-[11px]">{errors.message.message}</span>

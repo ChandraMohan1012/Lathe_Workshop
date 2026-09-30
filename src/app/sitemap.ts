@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next';
 import { mockProjects } from '@/lib/mockData';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://lathepattarai.com';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://lathepattarai.com';
 
   const staticRoutes = ['', '/portfolio', '/services', '/ongoing', '/about', '/contact'].map((route) => ({
     url: `${baseUrl}${route}`,

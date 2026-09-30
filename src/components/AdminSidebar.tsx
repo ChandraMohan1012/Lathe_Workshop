@@ -10,17 +10,20 @@ export default function AdminSidebar() {
 
   const menuItems = [
     { label: 'Dashboard', href: '/admin', icon: 'dashboard' },
-    { label: 'Enquiries / RFQs', href: '/admin/enquiries', icon: 'mark_email_unread' },
+    { label: 'Manage Works', href: '/admin/work', icon: 'inventory_2' },
     { label: 'Add New Project', href: '/admin/work/new', icon: 'add_box' },
+    { label: 'Enquiries / RFQs', href: '/admin/enquiries', icon: 'mark_email_unread' },
     { label: 'Workshop Settings', href: '/admin/settings', icon: 'settings' },
   ];
 
-  const handleLogout = () => {
-    // Clear admin auth state
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('lathe_admin_auth');
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/admin/logout', { method: 'POST' });
+    } catch (err) {
+      console.error(err);
     }
     router.push('/admin/login');
+    router.refresh();
   };
 
   return (

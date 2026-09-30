@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
-import { Project, LiveJob, Enquiry } from '@/types';
-import { mockProjects, mockLiveJobs, mockEnquiries } from './mockData';
+import { Project, LiveJob, Enquiry, WorkshopSettings } from '@/types';
+import { mockProjects, mockLiveJobs, mockEnquiries, initialSettings } from './mockData';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
@@ -11,47 +11,118 @@ export const supabase = isSupabaseConfigured
   ? createClient(supabaseUrl, supabaseAnonKey)
   : null;
 
-// Helper: Fetch Projects
+// ==========================================
+// 1. PROJECTS CRUD
+// ==========================================
 export async function getProjects(): Promise<Project[]> {
-  if (!isSupabaseConfigured || !supabase) {
-    return mockProjects;
-  }
+  if (!isSupabaseConfigured || !supabase) return mockProjects;
   try {
     const { data, error } = await supabase.from('projects').select('*').order('created_at', { ascending: false });
     if (error || !data || data.length === 0) return mockProjects;
     return data as Project[];
   } catch (err) {
-    console.warn('Supabase fetch failed, falling back to mock projects:', err);
     return mockProjects;
   }
 }
 
-// Helper: Fetch Project by Slug
 export async function getProjectBySlug(slug: string): Promise<Project | null> {
   const projects = await getProjects();
   return projects.find((p) => p.slug === slug) || null;
 }
 
-// Helper: Fetch Live Jobs
-export async function getLiveJobs(): Promise<LiveJob[]> {
+export async function getProjectById(id: string): Promise<Project | null> {
+  const projects = await getProjects();
+  return projects.find((p) => p.id === id) || null;
+}
+
+export async function createProject(projectData: Omit<Project, 'id'>): Promise<{ success: boolean; id: string }> {
+  const newId = `proj-${Date.now()}`;
+  const newProject = { ...projectData, id: newId };
+
   if (!isSupabaseConfigured || !supabase) {
-    return mockLiveJobs;
+    mockProjects.unshift(newProject);
+    return { success: true, id: newId };
   }
+
+  try {
+    const { data, error } = await supabase.from('projects').insert([projectData]).select();
+    if (error) throw error;
+    return { success: true, id: data?.[0]?.id || newId };
+  } catch (err) {
+    console.error('Supabase error inserting project:', err);
+    mockProjects.unshift(newProject);
+    return { success: true, id: newId };
+  }
+}
+
+export async function updateProject(id: string, updates: Partial<Project>): Promise<boolean> {
+  const idx = mockProjects.findIndex((p) => p.id === id);
+  if (idx !== -1) {
+    mockProjects[idx] = { ...mockProjects[idx], ...updates };
+  }
+
+  if (isSupabaseConfigured && supabase) {
+    try {
+      await supabase.from('projects').update(updates).eq('id', id);
+    } catch (err) {
+      console.error('Supabase update failed:', err);
+    }
+  }
+  return true;
+}
+
+export async function deleteProject(id: string): Promise<boolean> {
+  const idx = mockProjects.findIndex((p) => p.id === id);
+  if (idx !== -1) {
+    mockProjects.splice(idx, 1);
+  }
+
+  if (isSupabaseConfigured && supabase) {
+    try {
+      await supabase.from('projects').delete().eq('id', id);
+    } catch (err) {
+      console.error('Supabase delete failed:', err);
+    }
+  }
+  return true;
+}
+
+// ==========================================
+// 2. LIVE JOBS / TELEMETRY
+// ==========================================
+export async function getLiveJobs(): Promise<LiveJob[]> {
+  if (!isSupabaseConfigured || !supabase) return mockLiveJobs;
   try {
     const { data, error } = await supabase.from('live_jobs').select('*');
     if (error || !data || data.length === 0) return mockLiveJobs;
     return data as LiveJob[];
   } catch (err) {
-    console.warn('Supabase fetch failed, falling back to mock live jobs:', err);
     return mockLiveJobs;
   }
 }
 
-// Helper: Fetch Enquiries (Admin)
-export async function getEnquiries(): Promise<Enquiry[]> {
-  if (!isSupabaseConfigured || !supabase) {
-    return mockEnquiries;
+export async function updateLiveJobStatus(id: string, progress: number, status: LiveJob['status']): Promise<boolean> {
+  const job = mockLiveJobs.find((j) => j.id === id);
+  if (job) {
+    job.progress = progress;
+    job.status = status;
   }
+
+  if (isSupabaseConfigured && supabase) {
+    try {
+      await supabase.from('live_jobs').update({ progress, status }).eq('id', id);
+    } catch (err) {
+      console.error('Supabase live job update failed:', err);
+    }
+  }
+  return true;
+}
+
+// ==========================================
+// 3. ENQUIRIES CRUD
+// ==========================================
+export async function getEnquiries(): Promise<Enquiry[]> {
+  if (!isSupabaseConfigured || !supabase) return mockEnquiries;
   try {
     const { data, error } = await supabase.from('enquiries').select('*').order('created_at', { ascending: false });
     if (error || !data || data.length === 0) return mockEnquiries;
@@ -61,7 +132,6 @@ export async function getEnquiries(): Promise<Enquiry[]> {
   }
 }
 
-// Helper: Submit Enquiry Form
 export async function createEnquiry(enquiry: Omit<Enquiry, 'id' | 'createdAt' | 'status'>): Promise<{ success: boolean; id: string }> {
   const newId = `enq-${Date.now()}`;
   if (!isSupabaseConfigured || !supabase) {
@@ -88,7 +158,6 @@ export async function createEnquiry(enquiry: Omit<Enquiry, 'id' | 'createdAt' | 
     if (error) throw error;
     return { success: true, id: data?.[0]?.id || newId };
   } catch (err) {
-    console.error('Error saving enquiry to Supabase:', err);
     mockEnquiries.unshift({
       ...enquiry,
       id: newId,
@@ -97,4 +166,47 @@ export async function createEnquiry(enquiry: Omit<Enquiry, 'id' | 'createdAt' | 
     });
     return { success: true, id: newId };
   }
+}
+
+export async function updateEnquiryStatus(id: string, status: Enquiry['status']): Promise<boolean> {
+  const enq = mockEnquiries.find((e) => e.id === id);
+  if (enq) {
+    enq.status = status;
+  }
+
+  if (isSupabaseConfigured && supabase) {
+    try {
+      await supabase.from('enquiries').update({ status }).eq('id', id);
+    } catch (err) {
+      console.error('Supabase enquiry update failed:', err);
+    }
+  }
+  return true;
+}
+
+// ==========================================
+// 4. WORKSHOP SETTINGS
+// ==========================================
+export async function getWorkshopSettings(): Promise<WorkshopSettings> {
+  if (!isSupabaseConfigured || !supabase) return initialSettings;
+  try {
+    const { data, error } = await supabase.from('workshop_settings').select('*').single();
+    if (error || !data) return initialSettings;
+    return data as WorkshopSettings;
+  } catch (err) {
+    return initialSettings;
+  }
+}
+
+export async function updateWorkshopSettings(settings: Partial<WorkshopSettings>): Promise<boolean> {
+  Object.assign(initialSettings, settings);
+
+  if (isSupabaseConfigured && supabase) {
+    try {
+      await supabase.from('workshop_settings').update(settings).eq('id', 1);
+    } catch (err) {
+      console.error('Supabase settings update failed:', err);
+    }
+  }
+  return true;
 }
