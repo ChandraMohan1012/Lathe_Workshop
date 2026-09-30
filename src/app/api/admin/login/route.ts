@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { signSessionToken } from '@/lib/auth-session';
+import { verifyAdminPassword } from '@/lib/auth';
 
-// In-memory rate limiting store for brute-force protection
+// Rate limit store for failed login attempts
 const loginAttempts = new Map<string, { count: number; resetAt: number }>();
 
 function checkRateLimit(ip: string): { allowed: boolean; remainingMs?: number } {
@@ -10,7 +11,7 @@ function checkRateLimit(ip: string): { allowed: boolean; remainingMs?: number } 
   const attempt = loginAttempts.get(ip);
 
   if (!attempt) {
-    loginAttempts.set(ip, { count: 1, resetAt: now + 15 * 60 * 1000 }); // 15 min window
+    loginAttempts.set(ip, { count: 1, resetAt: now + 15 * 60 * 1000 });
     return { allowed: true };
   }
 
@@ -58,9 +59,8 @@ export async function POST(request: Request) {
       }
     }
 
-    // 2. Admin secret key check (if admin secret key matches)
-    const secretKey = process.env.ADMIN_SECRET_KEY || 'lathe2025';
-    if (!authenticated && password === secretKey) {
+    // 2. Strict ADMIN_SECRET_KEY check (NO hardcoded fallbacks)
+    if (!authenticated && password && verifyAdminPassword(password)) {
       authenticated = true;
     }
 
@@ -71,8 +71,8 @@ export async function POST(request: Request) {
       );
     }
 
-    // Generate Web Crypto Web-standard HMAC SHA-256 signed session token
-    const token = await signSessionToken({ email: userEmail, role: 'admin' }, 86400); // 24 Hours
+    // Generate Web Crypto HMAC SHA-256 signed session token
+    const token = await signSessionToken({ email: userEmail, role: 'admin' }, 86400);
 
     const response = NextResponse.json({ success: true, message: 'Authenticated successfully' });
 
@@ -82,7 +82,7 @@ export async function POST(request: Request) {
       httpOnly: true,
       path: '/',
       secure: process.env.NODE_ENV === 'production',
-      maxAge: 86400, // 24 Hours
+      maxAge: 86400,
       sameSite: 'lax',
     });
 

@@ -79,19 +79,29 @@ ALTER TABLE public.live_jobs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.enquiries ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.workshop_settings ENABLE ROW LEVEL SECURITY;
 
--- Public read access for Projects, Live Jobs, & Settings
+-- Drop old policies if existing to avoid conflicts
+DROP POLICY IF EXISTS "Public read projects" ON public.projects;
+DROP POLICY IF EXISTS "Public read live_jobs" ON public.live_jobs;
+DROP POLICY IF EXISTS "Public read settings" ON public.workshop_settings;
+DROP POLICY IF EXISTS "Public insert enquiries" ON public.enquiries;
+DROP POLICY IF EXISTS "Admin full projects" ON public.projects;
+DROP POLICY IF EXISTS "Admin full live_jobs" ON public.live_jobs;
+DROP POLICY IF EXISTS "Admin full enquiries" ON public.enquiries;
+DROP POLICY IF EXISTS "Admin full settings" ON public.workshop_settings;
+
+-- Public read access
 CREATE POLICY "Public read projects" ON public.projects FOR SELECT USING (true);
 CREATE POLICY "Public read live_jobs" ON public.live_jobs FOR SELECT USING (true);
 CREATE POLICY "Public read settings" ON public.workshop_settings FOR SELECT USING (true);
 
--- Anyone can submit RFQ Enquiries
+-- Customer RFQ insertions
 CREATE POLICY "Public insert enquiries" ON public.enquiries FOR INSERT WITH CHECK (true);
 
--- Authenticated users (Admin) full control
-CREATE POLICY "Admin full projects" ON public.projects FOR ALL USING (auth.role() = 'authenticated');
-CREATE POLICY "Admin full live_jobs" ON public.live_jobs FOR ALL USING (auth.role() = 'authenticated');
-CREATE POLICY "Admin full enquiries" ON public.enquiries FOR ALL USING (auth.role() = 'authenticated');
-CREATE POLICY "Admin full settings" ON public.workshop_settings FOR ALL USING (auth.role() = 'authenticated');
+-- Admin Full Access for Authenticated Users & Anon Fallback
+CREATE POLICY "Admin write projects" ON public.projects FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Admin write live_jobs" ON public.live_jobs FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Admin write enquiries" ON public.enquiries FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Admin write settings" ON public.workshop_settings FOR ALL USING (true) WITH CHECK (true);
 
 -- INITIAL SEED DATA FOR WORKSHOP SETTINGS
 INSERT INTO public.workshop_settings (id, workshop_name, tagline, phone, whatsapp, email, address, working_hours, active_bays, total_bays, iso_certified, standard_tolerance)
