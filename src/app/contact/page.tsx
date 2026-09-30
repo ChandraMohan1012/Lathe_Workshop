@@ -1,0 +1,293 @@
+'use client';
+
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
+import CtaBand from '@/components/CtaBand';
+import { initialSettings } from '@/lib/mockData';
+import { createEnquiry } from '@/lib/supabase';
+
+const enquirySchema = z.object({
+  name: z.string().min(2, 'Full name is required (min 2 chars)'),
+  email: z.string().email('Please enter a valid email address'),
+  phone: z.string().min(10, 'Valid 10-digit mobile number required'),
+  company: z.string().optional(),
+  serviceType: z.string().min(1, 'Please select a machining service'),
+  message: z.string().min(10, 'Please describe your component specs or tolerances'),
+});
+
+type EnquiryFormData = z.infer<typeof enquirySchema>;
+
+export default function ContactPage() {
+  const [submitting, setSubmitting] = useState(false);
+  const [submittedId, setSubmittedId] = useState<string | null>(null);
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<EnquiryFormData>({
+    resolver: zodResolver(enquirySchema),
+    defaultValues: {
+      serviceType: 'Heavy Lathe Turning',
+    },
+  });
+
+  const onSubmit = async (data: EnquiryFormData) => {
+    setSubmitting(true);
+    try {
+      const res = await createEnquiry(data);
+      setSubmittedId(res.id);
+      reset();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <>
+      <Navbar />
+
+      <main className="w-full pt-28 bg-surface flex flex-col flex-grow">
+        {/* HERO HEADER */}
+        <section className="w-full bg-surface-container-lowest px-gutter py-space-2xl border-b border-outline-variant/30">
+          <div className="max-w-7xl mx-auto flex flex-col gap-space-md">
+            <div className="inline-flex items-center gap-space-xs w-max bg-surface-container px-space-md py-space-xs rounded-full">
+              <span className="w-2 h-2 rounded-full bg-primary font-semibold"></span>
+              <span className="font-label-technical text-xs uppercase tracking-widest text-on-surface">
+                Technical Quotations // Guindy SIDCO Desk
+              </span>
+            </div>
+
+            <h1 className="font-display-xl text-display-xl-mobile sm:text-display-xl text-on-surface uppercase tracking-tight">
+              Request Workshop <span className="text-primary italic font-editorial-accent">Quotation</span>
+            </h1>
+
+            <p className="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">
+              Submit your engineering drawings or technical specifications. Our engineering desk evaluates blueprints within 2 to 4 hours.
+            </p>
+          </div>
+        </section>
+
+        {/* MAIN CONTACT & FORM SECTION */}
+        <section className="w-full px-gutter py-space-2xl bg-surface">
+          <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-space-2xl">
+            {/* Left Contact & Location Cards */}
+            <div className="lg:col-span-5 flex flex-col gap-space-lg">
+              <div className="bg-surface-container-lowest p-space-xl rounded-2xl border border-outline-variant/50 flex flex-col gap-space-md shadow-sm">
+                <h3 className="font-headline-sm text-xl uppercase tracking-tight text-on-surface flex items-center gap-2">
+                  <span className="material-symbols-outlined text-primary">storefront</span>
+                  Workshop Office
+                </h3>
+
+                <div className="flex flex-col gap-4 font-body-md text-on-surface-variant">
+                  <div className="flex items-start gap-3">
+                    <span className="material-symbols-outlined text-primary text-xl mt-0.5">location_on</span>
+                    <div>
+                      <strong className="text-on-surface block text-sm font-semibold">Address</strong>
+                      <span className="text-sm">{initialSettings.address}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <span className="material-symbols-outlined text-primary text-xl mt-0.5">call</span>
+                    <div>
+                      <strong className="text-on-surface block text-sm font-semibold">Direct Phone / WhatsApp</strong>
+                      <a href={`tel:${initialSettings.phone}`} className="text-sm text-primary hover:underline">
+                        {initialSettings.phone}
+                      </a>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <span className="material-symbols-outlined text-primary text-xl mt-0.5">mail</span>
+                    <div>
+                      <strong className="text-on-surface block text-sm font-semibold">Engineering Desk Email</strong>
+                      <a href={`mailto:${initialSettings.email}`} className="text-sm text-primary hover:underline">
+                        {initialSettings.email}
+                      </a>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <span className="material-symbols-outlined text-primary text-xl mt-0.5">schedule</span>
+                    <div>
+                      <strong className="text-on-surface block text-sm font-semibold">Workshop Hours</strong>
+                      <span className="text-sm">{initialSettings.workingHours}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-space-md border-t border-outline-variant/30 font-label-technical text-xs text-primary uppercase font-semibold flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                  Bays 01-14 Accepting Immediate Orders
+                </div>
+              </div>
+            </div>
+
+            {/* Right RFQ Form */}
+            <div className="lg:col-span-7">
+              <div className="bg-surface-container-lowest p-space-xl rounded-2xl border border-outline-variant/60 shadow-md flex flex-col gap-space-md">
+                <div className="flex flex-col gap-1 border-b border-outline-variant/40 pb- space-md">
+                  <h3 className="font-headline-sm text-2xl uppercase tracking-tight text-on-surface">
+                    Submit Job Specifications
+                  </h3>
+                  <p className="font-body-md text-sm text-on-surface-variant">
+                    Fill out the technical RFQ form below to receive itemized pricing & lead time estimates.
+                  </p>
+                </div>
+
+                {submittedId ? (
+                  <div className="bg-emerald-50 text-emerald-900 border border-emerald-300 p-space-lg rounded-xl flex flex-col gap-2 animate-in fade-in">
+                    <div className="flex items-center gap-2 text-emerald-800 font-headline-sm text-lg uppercase font-bold">
+                      <span className="material-symbols-outlined text-2xl">check_circle</span>
+                      Quotation Request Submitted!
+                    </div>
+                    <p className="font-body-md text-sm">
+                      Your enquiry reference ID is <strong className="font-mono">{submittedId}</strong>. Our engineering desk in Guindy SIDCO will review your details and contact you shortly.
+                    </p>
+                    <button
+                      onClick={() => setSubmittedId(null)}
+                      className="mt-3 w-max px-4 py-2 rounded-lg bg-emerald-800 text-white font-label-technical text-xs uppercase font-semibold hover:bg-emerald-900 transition-colors"
+                    >
+                      Submit Another Enquiry
+                    </button>
+                  </div>
+                ) : (
+                  <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-space-md">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-space-md">
+                      {/* Name */}
+                      <div className="flex flex-col gap-1">
+                        <label className="font-label-technical text-xs uppercase tracking-wider text-on-surface font-semibold">
+                          Full Name *
+                        </label>
+                        <input
+                          type="text"
+                          {...register('name')}
+                          placeholder="e.g. Ramesh Sundaram"
+                          className="px-space-md py- space-sm rounded-lg bg-surface-container-low border border-outline-variant/60 focus:outline-none focus:border-primary text-on-surface font-body-md text-sm"
+                        />
+                        {errors.name && (
+                          <span className="text-error font-label-technical text-[11px]">{errors.name.message}</span>
+                        )}
+                      </div>
+
+                      {/* Phone */}
+                      <div className="flex flex-col gap-1">
+                        <label className="font-label-technical text-xs uppercase tracking-wider text-on-surface font-semibold">
+                          Mobile Number *
+                        </label>
+                        <input
+                          type="tel"
+                          {...register('phone')}
+                          placeholder="+91 98765 43210"
+                          className="px-space-md py- space-sm rounded-lg bg-surface-container-low border border-outline-variant/60 focus:outline-none focus:border-primary text-on-surface font-body-md text-sm"
+                        />
+                        {errors.phone && (
+                          <span className="text-error font-label-technical text-[11px]">{errors.phone.message}</span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-space-md">
+                      {/* Email */}
+                      <div className="flex flex-col gap-1">
+                        <label className="font-label-technical text-xs uppercase tracking-wider text-on-surface font-semibold">
+                          Email Address *
+                        </label>
+                        <input
+                          type="email"
+                          {...register('email')}
+                          placeholder="ramesh@company.com"
+                          className="px-space-md py- space-sm rounded-lg bg-surface-container-low border border-outline-variant/60 focus:outline-none focus:border-primary text-on-surface font-body-md text-sm"
+                        />
+                        {errors.email && (
+                          <span className="text-error font-label-technical text-[11px]">{errors.email.message}</span>
+                        )}
+                      </div>
+
+                      {/* Company */}
+                      <div className="flex flex-col gap-1">
+                        <label className="font-label-technical text-xs uppercase tracking-wider text-on-surface font-semibold">
+                          Company / Industrial Unit (Optional)
+                        </label>
+                        <input
+                          type="text"
+                          {...register('company')}
+                          placeholder="e.g. Chennai Pump Dynamics"
+                          className="px-space-md py- space-sm rounded-lg bg-surface-container-low border border-outline-variant/60 focus:outline-none focus:border-primary text-on-surface font-body-md text-sm"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Service Type Select */}
+                    <div className="flex flex-col gap-1">
+                      <label className="font-label-technical text-xs uppercase tracking-wider text-on-surface font-semibold">
+                        Select Machining Service *
+                      </label>
+                      <select
+                        {...register('serviceType')}
+                        className="px-space-md py- space-sm rounded-lg bg-surface-container-low border border-outline-variant/60 focus:outline-none focus:border-primary text-on-surface font-body-md text-sm"
+                      >
+                        <option value="Heavy Lathe Turning">Heavy Lathe Shaft Turning</option>
+                        <option value="Brass Component Fabrication">Brass Component & Sleeve Fabrication</option>
+                        <option value="Prototype Tooling & Retooling">Prototype Tooling & Die Retooling</option>
+                        <option value="High Volume Batch Manufacturing">High Volume Batch Manufacturing</option>
+                        <option value="Other Custom Job">Other Precision Custom Job</option>
+                      </select>
+                    </div>
+
+                    {/* Message / Specs */}
+                    <div className="flex flex-col gap-1">
+                      <label className="font-label-technical text-xs uppercase tracking-wider text-on-surface font-semibold">
+                        Component Specs & Quantity *
+                      </label>
+                      <textarea
+                        rows={4}
+                        {...register('message')}
+                        placeholder="Detail raw material grade (e.g. SS316L, Brass C36000), required tolerances (e.g. ±0.005mm), batch quantity, and drawings..."
+                        className="px-space-md py- space-sm rounded-lg bg-surface-container-low border border-outline-variant/60 focus:outline-none focus:border-primary text-on-surface font-body-md text-sm"
+                      ></textarea>
+                      {errors.message && (
+                        <span className="text-error font-label-technical text-[11px]">{errors.message.message}</span>
+                      )}
+                    </div>
+
+                    {/* Submit Button */}
+                    <button
+                      type="submit"
+                      disabled={submitting}
+                      className="w-full py-space-md rounded-full bg-primary text-on-primary font-headline-sm text-sm uppercase tracking-wider hover:bg-primary/90 transition-all shadow-md flex items-center justify-center gap-2 mt-2 disabled:opacity-50"
+                    >
+                      {submitting ? (
+                        <>
+                          <span className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin"></span>
+                          <span>Processing Evaluation...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>Submit Technical RFQ</span>
+                          <span className="material-symbols-outlined text-base">send</span>
+                        </>
+                      )}
+                    </button>
+                  </form>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <CtaBand />
+      </main>
+
+      <Footer />
+    </>
+  );
+}

@@ -1,0 +1,137 @@
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-space-grotesk: 'Space Grotesk', sans-serif;
+  --font-be-vietnam: 'Be Vietnam Pro', sans-serif;
+  --font-playfair: 'Playfair Display', serif;
+  --ease-precision: cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+@layer base {
+  html, body {
+    margin: 0;
+    padding: 0;
+    background-color: #f9f9ff;
+    color: #181c22;
+    scroll-behavior: smooth;
+  }
+  body {
+    overscroll-behavior: none;
+  }
+  main > :first-child {
+    margin-top: 0 !important;
+  }
+  main > :last-child {
+    margin-bottom: 0 !important;
+  }
+}
+
+/* Custom scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #ebedf7;
+}
+::-webkit-scrollbar-thumb {
+  background: #cab988;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #6a5d34;
+}
+
+/* Nav link expanding gold underline */
+nav a[data-path] {
+  position: relative;
+}
+nav a[data-path]:not([aria-current="page"])::after {
+  content: '';
+  position: absolute;
+  left: 0.5rem;
+  right: 0.5rem;
+  bottom: 2px;
+  height: 1.5px;
+  background-color: #cab988;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.35s var(--ease-precision);
+}
+nav a[data-path]:not([aria-current="page"]):hover::after {
+  transform: scaleX(1);
+}
+
+/* Header scrolled elevation */
+header.nav-scrolled {
+  box-shadow: 0 4px 20px -2px rgba(24, 28, 34, 0.08);
+  border-bottom: 1px solid rgba(205, 198, 183, 0.45);
+}
+
+/* Animations */
+@keyframes heroRevealFadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero-animate-1 {
+  animation: heroRevealFadeUp 0.8s var(--ease-precision) 0.1s both;
+}
+.hero-animate-2 {
+  animation: heroRevealFadeUp 0.85s var(--ease-precision) 0.18s both;
+}
+.hero-animate-3 {
+  animation: heroRevealFadeUp 0.85s var(--ease-precision) 0.26s both;
+}
+.hero-animate-4 {
+  animation: heroRevealFadeUp 0.9s var(--ease-precision) 0.34s both;
+}
+.hero-animate-5 {
+  animation: heroRevealFadeUp 0.95s var(--ease-precision) 0.42s both;
+}
+
+@keyframes cardFan1 {
+  0% { transform: rotate(0deg) scale(0.92) translate(0, 0); opacity: 0; }
+  100% { transform: rotate(-6deg) scale(0.95) translate(1rem, 0); opacity: 1; }
+}
+@keyframes cardFan2 {
+  0% { transform: rotate(0deg) scale(0.92) translate(0, 0); opacity: 0; }
+  100% { transform: rotate(3deg) scale(0.95) translate(-0.75rem, 0.75rem); opacity: 1; }
+}
+@keyframes cardMaster {
+  0% { transform: translateY(24px) scale(0.97); opacity: 0; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.hero-card-fan-1 {
+  animation: cardFan1 1s var(--ease-precision) 0.2s both;
+  will-change: transform, opacity;
+}
+.hero-card-fan-2 {
+  animation: cardFan2 1.05s var(--ease-precision) 0.3s both;
+  will-change: transform, opacity;
+}
+.hero-card-master {
+  animation: cardMaster 0.95s var(--ease-precision) 0.15s both;
+  will-change: transform, opacity;
+}
+
+/* Interactive card zoom and lift */
+.interactive-card {
+  transition: transform 0.45s var(--ease-precision), box-shadow 0.45s var(--ease-precision);
+  will-change: transform;
+}
+.interactive-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px -6px rgba(24, 28, 34, 0.1);
+}
