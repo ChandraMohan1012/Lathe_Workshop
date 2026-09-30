@@ -4,9 +4,24 @@ export interface SessionPayload {
   exp: number;
 }
 
-const SESSION_SECRET = process.env.SESSION_SECRET || 'lathepattarai_guindy_super_secret_hmac_key_2025';
+// Ensure secret is present in environment or generate runtime secret (Web Crypto Edge compliant)
+function getSessionSecret(): string {
+  const secret = process.env.SESSION_SECRET;
+  if (!secret) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('CRITICAL SECURITY ERROR: SESSION_SECRET environment variable is missing.');
+    }
+    if (!(globalThis as any)._devSecret) {
+      const arr = new Uint8Array(32);
+      crypto.getRandomValues(arr);
+      (globalThis as any)._devSecret = Array.from(arr).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+    return 'dev_runtime_' + (globalThis as any)._devSecret;
+  }
+  return secret;
+}
 
-// Base64Url Encoding Helpers for Web Crypto / Edge compatibility
+// Base64Url Encoding Helpers
 function base64UrlEncode(str: string): string {
   return btoa(str).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
 }
@@ -28,13 +43,14 @@ async function getHmacKey(secret: string): Promise<CryptoKey> {
   );
 }
 
-// Sign token with HMAC-SHA256 using Web Crypto API (Edge + Node compatible)
+// Sign session token with HMAC-SHA256
 export async function signSessionToken(payload: Omit<SessionPayload, 'exp'>, expiresInSeconds = 86400): Promise<string> {
+  const secret = getSessionSecret();
   const exp = Math.floor(Date.now() / 1000) + expiresInSeconds;
   const fullPayload: SessionPayload = { ...payload, exp };
   const encodedPayload = base64UrlEncode(JSON.stringify(fullPayload));
 
-  const key = await getHmacKey(SESSION_SECRET);
+  const key = await getHmacKey(secret);
   const enc = new TextEncoder();
   const signatureBuffer = await crypto.subtle.sign('HMAC', key, enc.encode(encodedPayload));
   
@@ -47,17 +63,17 @@ export async function signSessionToken(payload: Omit<SessionPayload, 'exp'>, exp
   return `${encodedPayload}.${signatureBase64}`;
 }
 
-// Verify token signature and check expiry using Web Crypto API
+// Verify token signature and check expiry
 export async function verifySessionToken(token: string): Promise<SessionPayload | null> {
   if (!token || !token.includes('.')) return null;
 
   try {
+    const secret = getSessionSecret();
     const [encodedPayload, signature] = token.split('.');
 
-    const key = await getHmacKey(SESSION_SECRET);
+    const key = await getHmacKey(secret);
     const enc = new TextEncoder();
     
-    // Re-sign to verify
     const expectedBuffer = await crypto.subtle.sign('HMAC', key, enc.encode(encodedPayload));
     const expectedArray = Array.from(new Uint8Array(expectedBuffer));
     const expectedSignature = btoa(String.fromCharCode(...expectedArray))
@@ -66,12 +82,11 @@ export async function verifySessionToken(token: string): Promise<SessionPayload 
       .replace(/\//g, '_');
 
     if (signature !== expectedSignature) {
-      return null; // Forged token
+      return null; // Invalid signature / forged token
     }
 
     const payload: SessionPayload = JSON.parse(base64UrlDecode(encodedPayload));
 
-    // Check expiry
     if (Math.floor(Date.now() / 1000) > payload.exp) {
       return null; // Expired token
     }

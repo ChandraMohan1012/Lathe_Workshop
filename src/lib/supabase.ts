@@ -18,7 +18,11 @@ export async function getProjects(): Promise<Project[]> {
   if (!isSupabaseConfigured || !supabase) return mockProjects;
   try {
     const { data, error } = await supabase.from('projects').select('*').order('created_at', { ascending: false });
-    if (error || !data || data.length === 0) return mockProjects;
+    if (error) {
+      console.warn('Supabase fetch error, using local fallback:', error.message);
+      return mockProjects;
+    }
+    if (!data || data.length === 0) return mockProjects;
     return data as Project[];
   } catch (err) {
     return mockProjects;
@@ -35,7 +39,7 @@ export async function getProjectById(id: string): Promise<Project | null> {
   return projects.find((p) => p.id === id) || null;
 }
 
-export async function createProject(projectData: Omit<Project, 'id'>): Promise<{ success: boolean; id: string }> {
+export async function createProject(projectData: Omit<Project, 'id'>): Promise<{ success: boolean; id: string; error?: string }> {
   const newId = `proj-${Date.now()}`;
   const newProject = { ...projectData, id: newId };
 
@@ -46,16 +50,17 @@ export async function createProject(projectData: Omit<Project, 'id'>): Promise<{
 
   try {
     const { data, error } = await supabase.from('projects').insert([projectData]).select();
-    if (error) throw error;
+    if (error) {
+      return { success: false, id: '', error: `Database Error: ${error.message}` };
+    }
+    mockProjects.unshift(data?.[0] as Project || newProject);
     return { success: true, id: data?.[0]?.id || newId };
-  } catch (err) {
-    console.error('Supabase error inserting project:', err);
-    mockProjects.unshift(newProject);
-    return { success: true, id: newId };
+  } catch (err: any) {
+    return { success: false, id: '', error: err?.message || 'Database insert failed' };
   }
 }
 
-export async function updateProject(id: string, updates: Partial<Project>): Promise<boolean> {
+export async function updateProject(id: string, updates: Partial<Project>): Promise<{ success: boolean; error?: string }> {
   const idx = mockProjects.findIndex((p) => p.id === id);
   if (idx !== -1) {
     mockProjects[idx] = { ...mockProjects[idx], ...updates };
@@ -63,15 +68,18 @@ export async function updateProject(id: string, updates: Partial<Project>): Prom
 
   if (isSupabaseConfigured && supabase) {
     try {
-      await supabase.from('projects').update(updates).eq('id', id);
-    } catch (err) {
-      console.error('Supabase update failed:', err);
+      const { error } = await supabase.from('projects').update(updates).eq('id', id);
+      if (error) {
+        return { success: false, error: `Database Update Error: ${error.message}` };
+      }
+    } catch (err: any) {
+      return { success: false, error: err?.message || 'Update failed' };
     }
   }
-  return true;
+  return { success: true };
 }
 
-export async function deleteProject(id: string): Promise<boolean> {
+export async function deleteProject(id: string): Promise<{ success: boolean; error?: string }> {
   const idx = mockProjects.findIndex((p) => p.id === id);
   if (idx !== -1) {
     mockProjects.splice(idx, 1);
@@ -79,12 +87,15 @@ export async function deleteProject(id: string): Promise<boolean> {
 
   if (isSupabaseConfigured && supabase) {
     try {
-      await supabase.from('projects').delete().eq('id', id);
-    } catch (err) {
-      console.error('Supabase delete failed:', err);
+      const { error } = await supabase.from('projects').delete().eq('id', id);
+      if (error) {
+        return { success: false, error: `Database Delete Error: ${error.message}` };
+      }
+    } catch (err: any) {
+      return { success: false, error: err?.message || 'Delete failed' };
     }
   }
-  return true;
+  return { success: true };
 }
 
 // ==========================================
@@ -101,7 +112,7 @@ export async function getLiveJobs(): Promise<LiveJob[]> {
   }
 }
 
-export async function updateLiveJobStatus(id: string, progress: number, status: LiveJob['status']): Promise<boolean> {
+export async function updateLiveJobStatus(id: string, progress: number, status: LiveJob['status']): Promise<{ success: boolean; error?: string }> {
   const job = mockLiveJobs.find((j) => j.id === id);
   if (job) {
     job.progress = progress;
@@ -110,12 +121,13 @@ export async function updateLiveJobStatus(id: string, progress: number, status: 
 
   if (isSupabaseConfigured && supabase) {
     try {
-      await supabase.from('live_jobs').update({ progress, status }).eq('id', id);
-    } catch (err) {
-      console.error('Supabase live job update failed:', err);
+      const { error } = await supabase.from('live_jobs').update({ progress, status }).eq('id', id);
+      if (error) return { success: false, error: error.message };
+    } catch (err: any) {
+      return { success: false, error: err?.message || 'Update failed' };
     }
   }
-  return true;
+  return { success: true };
 }
 
 // ==========================================
@@ -132,7 +144,7 @@ export async function getEnquiries(): Promise<Enquiry[]> {
   }
 }
 
-export async function createEnquiry(enquiry: Omit<Enquiry, 'id' | 'createdAt' | 'status'>): Promise<{ success: boolean; id: string }> {
+export async function createEnquiry(enquiry: Omit<Enquiry, 'id' | 'createdAt' | 'status'>): Promise<{ success: boolean; id: string; error?: string }> {
   const newId = `enq-${Date.now()}`;
   if (!isSupabaseConfigured || !supabase) {
     mockEnquiries.unshift({
@@ -143,6 +155,7 @@ export async function createEnquiry(enquiry: Omit<Enquiry, 'id' | 'createdAt' | 
     });
     return { success: true, id: newId };
   }
+
   try {
     const { data, error } = await supabase.from('enquiries').insert([
       {
@@ -155,20 +168,18 @@ export async function createEnquiry(enquiry: Omit<Enquiry, 'id' | 'createdAt' | 
         status: 'New',
       },
     ]).select();
-    if (error) throw error;
+
+    if (error) {
+      return { success: false, id: '', error: `RFQ Submission Error: ${error.message}` };
+    }
+
     return { success: true, id: data?.[0]?.id || newId };
-  } catch (err) {
-    mockEnquiries.unshift({
-      ...enquiry,
-      id: newId,
-      status: 'New',
-      createdAt: new Date().toLocaleString(),
-    });
-    return { success: true, id: newId };
+  } catch (err: any) {
+    return { success: false, id: '', error: err?.message || 'RFQ Submission failed' };
   }
 }
 
-export async function updateEnquiryStatus(id: string, status: Enquiry['status']): Promise<boolean> {
+export async function updateEnquiryStatus(id: string, status: Enquiry['status']): Promise<{ success: boolean; error?: string }> {
   const enq = mockEnquiries.find((e) => e.id === id);
   if (enq) {
     enq.status = status;
@@ -176,12 +187,13 @@ export async function updateEnquiryStatus(id: string, status: Enquiry['status'])
 
   if (isSupabaseConfigured && supabase) {
     try {
-      await supabase.from('enquiries').update({ status }).eq('id', id);
-    } catch (err) {
-      console.error('Supabase enquiry update failed:', err);
+      const { error } = await supabase.from('enquiries').update({ status }).eq('id', id);
+      if (error) return { success: false, error: error.message };
+    } catch (err: any) {
+      return { success: false, error: err?.message || 'Update failed' };
     }
   }
-  return true;
+  return { success: true };
 }
 
 // ==========================================
@@ -198,15 +210,16 @@ export async function getWorkshopSettings(): Promise<WorkshopSettings> {
   }
 }
 
-export async function updateWorkshopSettings(settings: Partial<WorkshopSettings>): Promise<boolean> {
+export async function updateWorkshopSettings(settings: Partial<WorkshopSettings>): Promise<{ success: boolean; error?: string }> {
   Object.assign(initialSettings, settings);
 
   if (isSupabaseConfigured && supabase) {
     try {
-      await supabase.from('workshop_settings').update(settings).eq('id', 1);
-    } catch (err) {
-      console.error('Supabase settings update failed:', err);
+      const { error } = await supabase.from('workshop_settings').update(settings).eq('id', 1);
+      if (error) return { success: false, error: error.message };
+    } catch (err: any) {
+      return { success: false, error: err?.message || 'Settings update failed' };
     }
   }
-  return true;
+  return { success: true };
 }
