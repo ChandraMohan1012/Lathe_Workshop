@@ -38,7 +38,14 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(loginUrl);
       }
     } else {
-      // If Supabase credentials are not set, check for demo auth cookie
+      // In production, require Supabase Auth credentials. Demo fallback only works in development.
+      if (process.env.NODE_ENV === 'production') {
+        const loginUrl = new URL('/admin/login', request.url);
+        loginUrl.searchParams.set('from', pathname);
+        return NextResponse.redirect(loginUrl);
+      }
+
+      // Development demo fallback check
       const demoAuth = request.cookies.get('lathe_admin_demo_session')?.value;
       if (!demoAuth) {
         const loginUrl = new URL('/admin/login', request.url);

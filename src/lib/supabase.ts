@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { createSupabaseBrowserClient } from './supabase-browser';
 import { Project, LiveJob, Enquiry, WorkshopSettings } from '@/types';
 import { mockProjects, mockLiveJobs, mockEnquiries, initialSettings } from './mockData';
 
@@ -7,9 +8,18 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
 export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
 
+// Public read-only client
 export const supabase = isSupabaseConfigured
   ? createClient(supabaseUrl, supabaseAnonKey)
   : null;
+
+// Helper: Get authenticated Supabase client for client-side write calls
+function getAuthClient() {
+  if (typeof window !== 'undefined' && isSupabaseConfigured) {
+    return createSupabaseBrowserClient();
+  }
+  return supabase;
+}
 
 // ==========================================
 // 1. PROJECTS CRUD
@@ -18,11 +28,7 @@ export async function getProjects(): Promise<Project[]> {
   if (!isSupabaseConfigured || !supabase) return mockProjects;
   try {
     const { data, error } = await supabase.from('projects').select('*').order('created_at', { ascending: false });
-    if (error) {
-      console.warn('Supabase fetch error, using local fallback:', error.message);
-      return mockProjects;
-    }
-    if (!data || data.length === 0) return mockProjects;
+    if (error || !data || data.length === 0) return mockProjects;
     return data as Project[];
   } catch (err) {
     return mockProjects;
@@ -43,17 +49,20 @@ export async function createProject(projectData: Omit<Project, 'id'>): Promise<{
   const newId = `proj-${Date.now()}`;
   const newProject = { ...projectData, id: newId };
 
-  if (!isSupabaseConfigured || !supabase) {
+  if (!isSupabaseConfigured) {
     mockProjects.unshift(newProject);
     return { success: true, id: newId };
   }
 
   try {
-    const { data, error } = await supabase.from('projects').insert([projectData]).select();
+    const client = getAuthClient();
+    if (!client) throw new Error('Supabase client uninitialized');
+
+    const { data, error } = await client.from('projects').insert([projectData]).select();
     if (error) {
       return { success: false, id: '', error: `Database Error: ${error.message}` };
     }
-    mockProjects.unshift(data?.[0] as Project || newProject);
+    mockProjects.unshift((data?.[0] as Project) || newProject);
     return { success: true, id: data?.[0]?.id || newId };
   } catch (err: any) {
     return { success: false, id: '', error: err?.message || 'Database insert failed' };
@@ -66,9 +75,12 @@ export async function updateProject(id: string, updates: Partial<Project>): Prom
     mockProjects[idx] = { ...mockProjects[idx], ...updates };
   }
 
-  if (isSupabaseConfigured && supabase) {
+  if (isSupabaseConfigured) {
     try {
-      const { error } = await supabase.from('projects').update(updates).eq('id', id);
+      const client = getAuthClient();
+      if (!client) throw new Error('Supabase client uninitialized');
+
+      const { error } = await client.from('projects').update(updates).eq('id', id);
       if (error) {
         return { success: false, error: `Database Update Error: ${error.message}` };
       }
@@ -85,9 +97,12 @@ export async function deleteProject(id: string): Promise<{ success: boolean; err
     mockProjects.splice(idx, 1);
   }
 
-  if (isSupabaseConfigured && supabase) {
+  if (isSupabaseConfigured) {
     try {
-      const { error } = await supabase.from('projects').delete().eq('id', id);
+      const client = getAuthClient();
+      if (!client) throw new Error('Supabase client uninitialized');
+
+      const { error } = await client.from('projects').delete().eq('id', id);
       if (error) {
         return { success: false, error: `Database Delete Error: ${error.message}` };
       }
@@ -119,9 +134,12 @@ export async function updateLiveJobStatus(id: string, progress: number, status: 
     job.status = status;
   }
 
-  if (isSupabaseConfigured && supabase) {
+  if (isSupabaseConfigured) {
     try {
-      const { error } = await supabase.from('live_jobs').update({ progress, status }).eq('id', id);
+      const client = getAuthClient();
+      if (!client) throw new Error('Supabase client uninitialized');
+
+      const { error } = await client.from('live_jobs').update({ progress, status }).eq('id', id);
       if (error) return { success: false, error: error.message };
     } catch (err: any) {
       return { success: false, error: err?.message || 'Update failed' };
@@ -136,7 +154,10 @@ export async function updateLiveJobStatus(id: string, progress: number, status: 
 export async function getEnquiries(): Promise<Enquiry[]> {
   if (!isSupabaseConfigured || !supabase) return mockEnquiries;
   try {
-    const { data, error } = await supabase.from('enquiries').select('*').order('created_at', { ascending: false });
+    const client = getAuthClient();
+    if (!client) return mockEnquiries;
+
+    const { data, error } = await client.from('enquiries').select('*').order('created_at', { ascending: false });
     if (error || !data || data.length === 0) return mockEnquiries;
     return data as Enquiry[];
   } catch (err) {
@@ -185,9 +206,12 @@ export async function updateEnquiryStatus(id: string, status: Enquiry['status'])
     enq.status = status;
   }
 
-  if (isSupabaseConfigured && supabase) {
+  if (isSupabaseConfigured) {
     try {
-      const { error } = await supabase.from('enquiries').update({ status }).eq('id', id);
+      const client = getAuthClient();
+      if (!client) throw new Error('Supabase client uninitialized');
+
+      const { error } = await client.from('enquiries').update({ status }).eq('id', id);
       if (error) return { success: false, error: error.message };
     } catch (err: any) {
       return { success: false, error: err?.message || 'Update failed' };
@@ -213,9 +237,12 @@ export async function getWorkshopSettings(): Promise<WorkshopSettings> {
 export async function updateWorkshopSettings(settings: Partial<WorkshopSettings>): Promise<{ success: boolean; error?: string }> {
   Object.assign(initialSettings, settings);
 
-  if (isSupabaseConfigured && supabase) {
+  if (isSupabaseConfigured) {
     try {
-      const { error } = await supabase.from('workshop_settings').update(settings).eq('id', 1);
+      const client = getAuthClient();
+      if (!client) throw new Error('Supabase client uninitialized');
+
+      const { error } = await client.from('workshop_settings').update(settings).eq('id', 1);
       if (error) return { success: false, error: error.message };
     } catch (err: any) {
       return { success: false, error: err?.message || 'Settings update failed' };
