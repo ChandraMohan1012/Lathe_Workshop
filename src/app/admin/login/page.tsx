@@ -3,6 +3,7 @@
 import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
+import { createSupabaseBrowserClient } from '@/lib/supabase-browser';
 
 function LoginForm() {
   const [email, setEmail] = useState('');
@@ -19,24 +20,36 @@ function LoginForm() {
     setError('');
 
     try {
-      const res = await fetch('/api/admin/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-      const data = await res.json();
+      if (supabaseUrl && supabaseAnonKey) {
+        // Pure Supabase Auth signInWithPassword
+        const supabase = createSupabaseBrowserClient();
+        const { data, error: authError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
 
-      if (!res.ok || !data.success) {
-        setError(data.message || 'Invalid admin credentials.');
-        setLoading(false);
-        return;
+        if (authError || !data.user) {
+          setError(authError?.message || 'Invalid email or password.');
+          setLoading(false);
+          return;
+        }
+      } else {
+        // Fallback for offline demo mode without Supabase env credentials
+        if (!email || !password) {
+          setError('Email and password are required.');
+          setLoading(false);
+          return;
+        }
+        document.cookie = 'lathe_admin_demo_session=true; path=/; max-age=86400';
       }
 
       router.push(redirectPath);
       router.refresh();
-    } catch (err) {
-      setError('Connection error. Please try again.');
+    } catch (err: any) {
+      setError(err?.message || 'Authentication error. Please try again.');
       setLoading(false);
     }
   };
@@ -55,7 +68,7 @@ function LoginForm() {
           Admin Authentication
         </h1>
         <p className="font-body-md text-xs text-on-surface-variant">
-          Sign in with Supabase Owner Credentials or Admin Secret Key.
+          Sign in with registered Supabase Owner credentials.
         </p>
       </div>
 
@@ -69,10 +82,11 @@ function LoginForm() {
       <form onSubmit={handleLogin} className="flex flex-col gap-space-md">
         <div className="flex flex-col gap-1">
           <label className="font-label-technical text-xs uppercase tracking-wider text-on-surface font-semibold">
-            Admin Email (Optional if using secret key)
+            Admin Email *
           </label>
           <input
             type="email"
+            required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="admin@lathepattarai.com"
@@ -82,14 +96,14 @@ function LoginForm() {
 
         <div className="flex flex-col gap-1">
           <label className="font-label-technical text-xs uppercase tracking-wider text-on-surface font-semibold">
-            Password / Admin Secret Key *
+            Password *
           </label>
           <input
             type="password"
+            required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="Enter password or admin key"
-            required
+            placeholder="Enter password"
             className="px-space-md py-space-sm rounded-lg bg-surface-container-low border border-outline-variant/60 focus:outline-none focus:border-primary text-on-surface font-body-md text-sm"
           />
         </div>
@@ -100,7 +114,7 @@ function LoginForm() {
           className="w-full py-space-md rounded-full bg-primary text-on-primary font-headline-sm text-xs uppercase tracking-wider hover:bg-primary/90 transition-all shadow-md flex items-center justify-center gap-2 mt-2 disabled:opacity-50"
         >
           {loading ? (
-            <span>Verifying Credentials...</span>
+            <span>Signing in...</span>
           ) : (
             <>
               <span>Sign In to Admin Portal</span>

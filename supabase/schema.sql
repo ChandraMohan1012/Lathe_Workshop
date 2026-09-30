@@ -1,5 +1,5 @@
 -- ========================================================
--- LATHE PATTARAI WORKSHOP - SUPABASE DATABASE SCHEMA
+-- LATHE PATTARAI WORKSHOP - STRICT SUPABASE SECURITY SCHEMA
 -- ========================================================
 
 -- Enable UUID extension
@@ -73,35 +73,56 @@ CREATE TABLE IF NOT EXISTS public.workshop_settings (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- ROW LEVEL SECURITY (RLS) POLICIES
+-- ENABLE ROW LEVEL SECURITY (RLS)
 ALTER TABLE public.projects ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.live_jobs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.enquiries ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.workshop_settings ENABLE ROW LEVEL SECURITY;
 
--- Drop old policies if existing to avoid conflicts
+-- DROP OLD POLICIES
 DROP POLICY IF EXISTS "Public read projects" ON public.projects;
 DROP POLICY IF EXISTS "Public read live_jobs" ON public.live_jobs;
 DROP POLICY IF EXISTS "Public read settings" ON public.workshop_settings;
 DROP POLICY IF EXISTS "Public insert enquiries" ON public.enquiries;
-DROP POLICY IF EXISTS "Admin full projects" ON public.projects;
-DROP POLICY IF EXISTS "Admin full live_jobs" ON public.live_jobs;
-DROP POLICY IF EXISTS "Admin full enquiries" ON public.enquiries;
-DROP POLICY IF EXISTS "Admin full settings" ON public.workshop_settings;
+DROP POLICY IF EXISTS "Admin write projects" ON public.projects;
+DROP POLICY IF EXISTS "Admin write live_jobs" ON public.live_jobs;
+DROP POLICY IF EXISTS "Admin write enquiries" ON public.enquiries;
+DROP POLICY IF EXISTS "Admin write settings" ON public.workshop_settings;
 
--- Public read access
+-- 1. PUBLIC READ POLICIES
 CREATE POLICY "Public read projects" ON public.projects FOR SELECT USING (true);
 CREATE POLICY "Public read live_jobs" ON public.live_jobs FOR SELECT USING (true);
 CREATE POLICY "Public read settings" ON public.workshop_settings FOR SELECT USING (true);
 
--- Customer RFQ insertions
+-- 2. PUBLIC RFQ INSERTION (CUSTOMER ENQUIRIES ONLY)
 CREATE POLICY "Public insert enquiries" ON public.enquiries FOR INSERT WITH CHECK (true);
 
--- Admin Full Access for Authenticated Users & Anon Fallback
-CREATE POLICY "Admin write projects" ON public.projects FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Admin write live_jobs" ON public.live_jobs FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Admin write enquiries" ON public.enquiries FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Admin write settings" ON public.workshop_settings FOR ALL USING (true) WITH CHECK (true);
+-- 3. STRICT AUTHENTICATED WRITE POLICIES (ADMIN ONLY)
+CREATE POLICY "Admin write projects" ON public.projects
+  FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+CREATE POLICY "Admin write live_jobs" ON public.live_jobs
+  FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+CREATE POLICY "Admin manage enquiries" ON public.enquiries
+  FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+CREATE POLICY "Admin write settings" ON public.workshop_settings
+  FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+-- 4. SUPABASE STORAGE POLICIES FOR 'project-images' BUCKET
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('project-images', 'project-images', true)
+ON CONFLICT (id) DO NOTHING;
+
+DROP POLICY IF EXISTS "Public read project images" ON storage.objects;
+DROP POLICY IF EXISTS "Authenticated upload project images" ON storage.objects;
+
+CREATE POLICY "Public read project images" ON storage.objects
+  FOR SELECT USING (bucket_id = 'project-images');
+
+CREATE POLICY "Authenticated upload project images" ON storage.objects
+  FOR ALL TO authenticated WITH CHECK (bucket_id = 'project-images');
 
 -- INITIAL SEED DATA FOR WORKSHOP SETTINGS
 INSERT INTO public.workshop_settings (id, workshop_name, tagline, phone, whatsapp, email, address, working_hours, active_bays, total_bays, iso_certified, standard_tolerance)

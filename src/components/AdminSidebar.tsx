@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { createSupabaseBrowserClient } from '@/lib/supabase-browser';
 
 export default function AdminSidebar() {
   const pathname = usePathname();
@@ -18,7 +19,14 @@ export default function AdminSidebar() {
 
   const handleLogout = async () => {
     try {
-      await fetch('/api/admin/logout', { method: 'POST' });
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+      if (supabaseUrl && supabaseAnonKey) {
+        const supabase = createSupabaseBrowserClient();
+        await supabase.auth.signOut();
+      }
+      document.cookie = 'lathe_admin_demo_session=; path=/; max-age=0';
     } catch (err) {
       console.error(err);
     }
