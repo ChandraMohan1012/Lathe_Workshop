@@ -7,21 +7,22 @@ import WorkCard from '@/components/WorkCard';
 import FaqAccordion from '@/components/FaqAccordion';
 import CtaBand from '@/components/CtaBand';
 import JsonLd from '@/components/JsonLd';
-import { getProjects, getLiveJobs } from '@/lib/supabase';
-import { mockFaqs, initialSettings } from '@/lib/mockData';
+import { getProjects, getLiveJobs, getWorkshopSettings } from '@/lib/supabase';
+import { mockFaqs } from '@/lib/mockData';
 
 export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
   const projects = await getProjects();
   const liveJobs = await getLiveJobs();
+  const settings = await getWorkshopSettings();
   const featuredProjects = projects.filter((p) => p.featured || true).slice(0, 3);
   const activeJobs = liveJobs.slice(0, 4);
 
   return (
     <>
       <JsonLd />
-      <Navbar />
+      <Navbar settings={settings} />
 
       <main className="w-full pt-28 bg-surface flex flex-col flex-grow">
         {/* HERO SECTION */}
@@ -37,7 +38,7 @@ export default async function HomePage() {
               </h1>
 
               <p className="font-body-lg text-body-lg text-on-surface-variant max-w-xl">
-                Single-piece prototype retooling, precision brass turning, and high-tolerance batch manufacturing. Calibrated down to <strong className="text-on-surface font-semibold">{initialSettings.standardTolerance}</strong> dimensional accuracy.
+                Single-piece prototype retooling, precision brass turning, and high-tolerance batch manufacturing. Calibrated down to <strong className="text-on-surface font-semibold">{settings.standardTolerance}</strong> dimensional accuracy.
               </p>
 
               <div className="flex flex-wrap items-center gap-space-md pt-2">
@@ -61,11 +62,11 @@ export default async function HomePage() {
               <div className="pt-space-md grid grid-cols-3 gap-space-sm border-t border-outline-variant/40 mt-4 max-w-lg">
                 <div>
                   <span className="block font-label-technical text-[10px] uppercase text-on-surface-variant">Calibrated Tolerance</span>
-                  <span className="font-headline-sm text-sm text-primary uppercase font-bold">{initialSettings.standardTolerance}</span>
+                  <span className="font-headline-sm text-sm text-primary uppercase font-bold">{settings.standardTolerance}</span>
                 </div>
                 <div>
                   <span className="block font-label-technical text-[10px] uppercase text-on-surface-variant">Active Bays</span>
-                  <span className="font-headline-sm text-sm text-on-surface uppercase font-bold">{initialSettings.activeBays} Online</span>
+                  <span className="font-headline-sm text-sm text-on-surface uppercase font-bold">{settings.activeBays} Online</span>
                 </div>
                 <div>
                   <span className="block font-label-technical text-[10px] uppercase text-on-surface-variant">Batch Lead</span>
@@ -266,7 +267,7 @@ export default async function HomePage() {
         <CtaBand />
       </main>
 
-      <Footer />
+      <Footer settings={settings} />
     </>
   );
 }

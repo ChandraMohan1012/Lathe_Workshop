@@ -5,7 +5,7 @@ import { notFound } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import CtaBand from '@/components/CtaBand';
-import { getProjectBySlug, getProjects } from '@/lib/supabase';
+import { getProjectBySlug, getProjects, getWorkshopSettings } from '@/lib/supabase';
 import WorkCard from '@/components/WorkCard';
 
 interface PageProps {
@@ -30,11 +30,12 @@ export default async function PortfolioDetailPage({ params }: PageProps) {
   if (!project) notFound();
 
   const allProjects = await getProjects();
+  const settings = await getWorkshopSettings();
   const relatedProjects = allProjects.filter((p) => p.slug !== project.slug).slice(0, 2);
 
   return (
     <>
-      <Navbar />
+      <Navbar settings={settings} />
 
       <main className="w-full pt-28 bg-surface flex flex-col flex-grow">
         {/* Breadcrumb strip */}
@@ -198,7 +199,7 @@ export default async function PortfolioDetailPage({ params }: PageProps) {
         <CtaBand />
       </main>
 
-      <Footer />
+      <Footer settings={settings} />
     </>
   );
 }

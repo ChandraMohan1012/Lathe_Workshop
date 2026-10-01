@@ -4,9 +4,14 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
+import { WorkshopSettings } from '@/types';
 import { initialSettings } from '@/lib/mockData';
 
-export default function Navbar() {
+interface NavbarProps {
+  settings?: WorkshopSettings;
+}
+
+export default function Navbar({ settings = initialSettings }: NavbarProps) {
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -88,7 +93,7 @@ export default function Navbar() {
         {/* Action Button & Mobile Toggle */}
         <div className="flex items-center gap-space-sm">
           <a
-            href={`https://wa.me/${initialSettings.whatsapp.replace(/[^0-9]/g, '')}`}
+            href={`https://wa.me/${(settings.whatsapp || initialSettings.whatsapp).replace(/[^0-9]/g, '')}`}
             target="_blank"
             rel="noopener noreferrer"
             className="hidden sm:inline-flex items-center gap-space-xs px-space-md py- space-xs py-2 rounded-full bg-surface-container text-on-surface font-label-technical text-[11px] uppercase tracking-wider hover:bg-primary-container hover:text-on-primary-container transition-all border border-outline-variant"
@@ -139,7 +144,7 @@ export default function Navbar() {
             );
           })}
           <a
-            href={`https://wa.me/${initialSettings.whatsapp.replace(/[^0-9]/g, '')}`}
+            href={`https://wa.me/${(settings.whatsapp || initialSettings.whatsapp).replace(/[^0-9]/g, '')}`}
             target="_blank"
             rel="noopener noreferrer"
             className="mt-2 w-full text-center py-3 rounded-full bg-primary text-on-primary font-label-technical text-xs uppercase tracking-wider font-semibold"

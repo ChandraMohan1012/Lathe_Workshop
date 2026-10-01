@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -8,7 +8,8 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import CtaBand from '@/components/CtaBand';
 import { initialSettings } from '@/lib/mockData';
-import { createEnquiry } from '@/lib/supabase';
+import { createEnquiry, getWorkshopSettings } from '@/lib/supabase';
+import { WorkshopSettings } from '@/types';
 
 const enquirySchema = z.object({
   name: z.string().min(2, 'Full name is required (min 2 chars)'),
@@ -25,6 +26,13 @@ type EnquiryFormData = z.infer<typeof enquirySchema>;
 export default function ContactPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submittedId, setSubmittedId] = useState<string | null>(null);
+  const [settings, setSettings] = useState<WorkshopSettings>(initialSettings);
+
+  useEffect(() => {
+    getWorkshopSettings().then((res) => {
+      if (res) setSettings(res);
+    });
+  }, []);
 
   const {
     register,
@@ -68,7 +76,7 @@ export default function ContactPage() {
 
   return (
     <>
-      <Navbar />
+      <Navbar settings={settings} />
 
       <main className="w-full pt-28 bg-surface flex flex-col flex-grow">
         {/* HERO HEADER */}
@@ -100,7 +108,7 @@ export default function ContactPage() {
                     <span className="material-symbols-outlined text-primary text-xl mt-0.5">location_on</span>
                     <div>
                       <strong className="text-on-surface block text-sm font-semibold">Address</strong>
-                      <span className="text-sm">{initialSettings.address}</span>
+                      <span className="text-sm">{settings.address}</span>
                     </div>
                   </div>
 
@@ -108,8 +116,8 @@ export default function ContactPage() {
                     <span className="material-symbols-outlined text-primary text-xl mt-0.5">call</span>
                     <div>
                       <strong className="text-on-surface block text-sm font-semibold">Direct Phone / WhatsApp</strong>
-                      <a href={`tel:${initialSettings.phone}`} className="text-sm text-primary hover:underline">
-                        {initialSettings.phone}
+                      <a href={`tel:${settings.phone}`} className="text-sm text-primary hover:underline">
+                        {settings.phone}
                       </a>
                     </div>
                   </div>
@@ -118,8 +126,8 @@ export default function ContactPage() {
                     <span className="material-symbols-outlined text-primary text-xl mt-0.5">mail</span>
                     <div>
                       <strong className="text-on-surface block text-sm font-semibold">Engineering Desk Email</strong>
-                      <a href={`mailto:${initialSettings.email}`} className="text-sm text-primary hover:underline">
-                        {initialSettings.email}
+                      <a href={`mailto:${settings.email}`} className="text-sm text-primary hover:underline">
+                        {settings.email}
                       </a>
                     </div>
                   </div>
@@ -128,7 +136,7 @@ export default function ContactPage() {
                     <span className="material-symbols-outlined text-primary text-xl mt-0.5">schedule</span>
                     <div>
                       <strong className="text-on-surface block text-sm font-semibold">Workshop Hours</strong>
-                      <span className="text-sm">{initialSettings.workingHours}</span>
+                      <span className="text-sm">{settings.workingHours}</span>
                     </div>
                   </div>
                 </div>
@@ -295,7 +303,7 @@ export default function ContactPage() {
         <CtaBand />
       </main>
 
-      <Footer />
+      <Footer settings={settings} />
     </>
   );
 }

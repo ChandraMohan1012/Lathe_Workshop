@@ -11,9 +11,12 @@ export const metadata: Metadata = {
   description: 'Explore Lathe Pattarai specialized machining capabilities: high-precision lathe turning, brass component milling, shaft threading, and emergency prototype retooling.',
 };
 
+import { getWorkshopSettings } from '@/lib/supabase';
+
 export const dynamic = 'force-dynamic';
 
-export default function ServicesPage() {
+export default async function ServicesPage() {
+  const settings = await getWorkshopSettings();
   const servicesList = [
     {
       id: 'heavy-turning',
@@ -67,7 +70,7 @@ export default function ServicesPage() {
 
   return (
     <>
-      <Navbar />
+      <Navbar settings={settings} />
 
       <main className="w-full pt-28 bg-surface flex flex-col flex-grow">
         {/* HERO HEADER */}
@@ -78,12 +81,12 @@ export default function ServicesPage() {
             </h1>
 
             <p className="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">
-              Subtractive precision manufacturing, single-piece prototype retooling, and high-tolerance batch component production in Guindy SIDCO. Calibrated down to {initialSettings.standardTolerance} dimensional integrity.
+              Subtractive precision manufacturing, single-piece prototype retooling, and high-tolerance batch component production in Guindy SIDCO. Calibrated down to {settings.standardTolerance} dimensional integrity.
             </p>
           </div>
         </section>
 
-        <StatsBanner />
+        <StatsBanner settings={settings} />
 
         {/* SERVICES LIST */}
         <section className="w-full px-gutter py-space-2xl bg-surface">
@@ -129,7 +132,7 @@ export default function ServicesPage() {
         <CtaBand />
       </main>
 
-      <Footer />
+      <Footer settings={settings} />
     </>
   );
 }

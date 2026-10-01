@@ -1,10 +1,22 @@
-import { mockStats } from '@/lib/mockData';
+import { WorkshopSettings } from '@/types';
+import { initialSettings } from '@/lib/mockData';
 
-export default function StatsBanner() {
+interface StatsBannerProps {
+  settings?: WorkshopSettings;
+}
+
+export default function StatsBanner({ settings = initialSettings }: StatsBannerProps) {
+  const statsList = [
+    { label: 'Active Turning Bays', value: `${settings.activeBays} / ${settings.totalBays}` },
+    { label: 'Precision Tolerance', value: settings.standardTolerance },
+    { label: 'Turnaround Lead', value: '48 Hours' },
+    { label: 'Guindy SIDCO Unit', value: 'Plot 14-B' },
+  ];
+
   return (
     <section className="w-full bg-surface-container-high border-y border-outline-variant/40 px-gutter py-space-md">
       <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-space-md text-center">
-        {mockStats.map((stat, idx) => (
+        {statsList.map((stat, idx) => (
           <div
             key={idx}
             className="flex flex-col items-center justify-center p-space-sm border-r last:border-r-0 border-outline-variant/30"

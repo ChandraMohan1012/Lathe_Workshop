@@ -11,10 +11,16 @@ export const metadata: Metadata = {
   description: 'Learn about Lathe Pattarai precision manufacturing heritage, master machinist tradition, and calibrated lathe turning facility in Guindy SIDCO, Chennai.',
 };
 
-export default function AboutPage() {
+import { getWorkshopSettings } from '@/lib/supabase';
+
+export const dynamic = 'force-dynamic';
+
+export default async function AboutPage() {
+  const settings = await getWorkshopSettings();
+
   return (
     <>
-      <Navbar />
+      <Navbar settings={settings} />
 
       <main className="w-full pt-28 bg-surface flex flex-col flex-grow">
         {/* HERO HEADER */}
@@ -30,7 +36,7 @@ export default function AboutPage() {
           </div>
         </section>
 
-        <StatsBanner />
+        <StatsBanner settings={settings} />
 
         {/* FOUNDER & HERITAGE SECTION */}
         <section className="w-full px-gutter py-space-2xl bg-surface">
@@ -107,7 +113,7 @@ export default function AboutPage() {
         <CtaBand />
       </main>
 
-      <Footer />
+      <Footer settings={settings} />
     </>
   );
 }

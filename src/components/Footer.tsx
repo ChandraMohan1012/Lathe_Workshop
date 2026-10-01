@@ -1,8 +1,13 @@
 import Link from 'next/link';
 import Image from 'next/image';
+import { WorkshopSettings } from '@/types';
 import { initialSettings } from '@/lib/mockData';
 
-export default function Footer() {
+interface FooterProps {
+  settings?: WorkshopSettings;
+}
+
+export default function Footer({ settings = initialSettings }: FooterProps) {
   return (
     <footer className="w-full bg-inverse-surface text-inverse-on-surface border-t border-surface-container-highest">
       <div className="max-w-7xl mx-auto px-gutter py-space-2xl">
@@ -93,23 +98,23 @@ export default function Footer() {
             <div className="flex flex-col gap-3 font-body-md text-surface-dim">
               <div className="flex items-start gap-2">
                 <span className="material-symbols-outlined text-primary-fixed text-lg mt-0.5">location_on</span>
-                <span>{initialSettings.address}</span>
+                <span>{settings.address}</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-primary-fixed text-lg">call</span>
-                <a href={`tel:${initialSettings.phone}`} className="hover:text-white transition-colors">
-                  {initialSettings.phone}
+                <a href={`tel:${settings.phone}`} className="hover:text-white transition-colors">
+                  {settings.phone}
                 </a>
               </div>
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-primary-fixed text-lg">mail</span>
-                <a href={`mailto:${initialSettings.email}`} className="hover:text-white transition-colors">
-                  {initialSettings.email}
+                <a href={`mailto:${settings.email}`} className="hover:text-white transition-colors">
+                  {settings.email}
                 </a>
               </div>
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-primary-fixed text-lg">schedule</span>
-                <span>{initialSettings.workingHours}</span>
+                <span>{settings.workingHours}</span>
               </div>
             </div>
           </div>
@@ -117,7 +122,7 @@ export default function Footer() {
 
         {/* Bottom Bar */}
         <div className="mt-space-2xl pt-space-md border-t border-surface-variant/20 flex flex-col sm:flex-row items-center justify-between gap-space-sm font-label-technical text-[11px] text-surface-dim uppercase tracking-wider">
-          <p>© {new Date().getFullYear()} {initialSettings.workshopName}. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} {settings.workshopName}. All rights reserved.</p>
           <p>Guindy SIDCO Industrial Unit • Precision Machining Excellence</p>
         </div>
       </div>

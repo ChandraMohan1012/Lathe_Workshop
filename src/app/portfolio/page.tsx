@@ -3,7 +3,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import WorkCard from '@/components/WorkCard';
 import CtaBand from '@/components/CtaBand';
-import { getProjects } from '@/lib/supabase';
+import { getProjects, getWorkshopSettings } from '@/lib/supabase';
 
 export const metadata: Metadata = {
   title: 'Machining Portfolio & Work Showcase',
@@ -14,10 +14,11 @@ export const dynamic = 'force-dynamic';
 
 export default async function PortfolioPage() {
   const projects = await getProjects();
+  const settings = await getWorkshopSettings();
 
   return (
     <>
-      <Navbar />
+      <Navbar settings={settings} />
 
       <main className="w-full pt-28 bg-surface flex flex-col flex-grow">
         {/* HEADER SECTION */}
@@ -50,7 +51,7 @@ export default async function PortfolioPage() {
         />
       </main>
 
-      <Footer />
+      <Footer settings={settings} />
     </>
   );
 }

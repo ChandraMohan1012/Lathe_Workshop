@@ -3,8 +3,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import CtaBand from '@/components/CtaBand';
 import StatsBanner from '@/components/StatsBanner';
-import { getLiveJobs } from '@/lib/supabase';
-import { initialSettings } from '@/lib/mockData';
+import { getLiveJobs, getWorkshopSettings } from '@/lib/supabase';
 
 export const metadata: Metadata = {
   title: 'Live Workshop Jobs & Bay Status Tracker',
@@ -15,10 +14,11 @@ export const dynamic = 'force-dynamic';
 
 export default async function OngoingPage() {
   const liveJobs = await getLiveJobs();
+  const settings = await getWorkshopSettings();
 
   return (
     <>
-      <Navbar />
+      <Navbar settings={settings} />
 
       <main className="w-full pt-28 bg-surface flex flex-col flex-grow">
         {/* HERO HEADER */}
@@ -103,7 +103,7 @@ export default async function OngoingPage() {
         />
       </main>
 
-      <Footer />
+      <Footer settings={settings} />
     </>
   );
 }

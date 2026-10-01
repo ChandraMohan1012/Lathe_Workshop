@@ -228,7 +228,19 @@ export async function getWorkshopSettings(): Promise<WorkshopSettings> {
   try {
     const { data, error } = await supabase.from('workshop_settings').select('*').single();
     if (error || !data) return initialSettings;
-    return data as WorkshopSettings;
+    return {
+      workshopName: data.workshop_name ?? data.workshopName ?? initialSettings.workshopName,
+      tagline: data.tagline ?? initialSettings.tagline,
+      phone: data.phone ?? initialSettings.phone,
+      whatsapp: data.whatsapp ?? initialSettings.whatsapp,
+      email: data.email ?? initialSettings.email,
+      address: data.address ?? initialSettings.address,
+      workingHours: data.working_hours ?? data.workingHours ?? initialSettings.workingHours,
+      activeBays: Number(data.active_bays ?? data.activeBays ?? initialSettings.activeBays),
+      totalBays: Number(data.total_bays ?? data.totalBays ?? initialSettings.totalBays),
+      isoCertified: Boolean(data.iso_certified ?? data.isoCertified ?? initialSettings.isoCertified),
+      standardTolerance: data.standard_tolerance ?? data.standardTolerance ?? initialSettings.standardTolerance,
+    };
   } catch (err) {
     return initialSettings;
   }
@@ -242,7 +254,21 @@ export async function updateWorkshopSettings(settings: Partial<WorkshopSettings>
       const client = getAuthClient();
       if (!client) throw new Error('Supabase client uninitialized');
 
-      const { error } = await client.from('workshop_settings').update(settings).eq('id', 1);
+      const dbPayload: Record<string, any> = {};
+      if (settings.workshopName !== undefined) dbPayload.workshop_name = settings.workshopName;
+      if (settings.tagline !== undefined) dbPayload.tagline = settings.tagline;
+      if (settings.phone !== undefined) dbPayload.phone = settings.phone;
+      if (settings.whatsapp !== undefined) dbPayload.whatsapp = settings.whatsapp;
+      if (settings.email !== undefined) dbPayload.email = settings.email;
+      if (settings.address !== undefined) dbPayload.address = settings.address;
+      if (settings.workingHours !== undefined) dbPayload.working_hours = settings.workingHours;
+      if (settings.activeBays !== undefined) dbPayload.active_bays = Number(settings.activeBays);
+      if (settings.totalBays !== undefined) dbPayload.total_bays = Number(settings.totalBays);
+      if (settings.isoCertified !== undefined) dbPayload.iso_certified = Boolean(settings.isoCertified);
+      if (settings.standardTolerance !== undefined) dbPayload.standard_tolerance = settings.standardTolerance;
+      dbPayload.updated_at = new Date().toISOString();
+
+      const { error } = await client.from('workshop_settings').update(dbPayload).eq('id', 1);
       if (error) return { success: false, error: error.message };
     } catch (err: any) {
       return { success: false, error: err?.message || 'Settings update failed' };
