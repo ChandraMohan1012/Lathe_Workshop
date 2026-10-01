@@ -14,6 +14,8 @@ export const metadata: Metadata = {
 import { getWorkshopSettings } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+export const fetchCache = 'force-no-store';
 
 export default async function AboutPage() {
   const settings = await getWorkshopSettings();

@@ -53,14 +53,14 @@ export default function Navbar({ settings = initialSettings }: NavbarProps) {
           <div className="relative h-9 w-9 flex-shrink-0">
             <Image
               src="/images/logo.png"
-              alt="Lathe Pattarai Brand Logo"
+              alt={`${settings.workshopName} Brand Logo`}
               fill
               className="object-contain"
             />
           </div>
           <div className="flex flex-col">
             <span className="font-headline-sm text-headline-sm uppercase tracking-tight text-on-surface group-hover:text-primary transition-colors">
-              Lathe Pattarai
+              {settings.workshopName}
             </span>
             <span className="font-label-technical text-[10px] uppercase tracking-widest text-primary font-medium">
               Precision Machining Workshop
