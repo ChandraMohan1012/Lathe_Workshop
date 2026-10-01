@@ -41,23 +41,6 @@ export default function Navbar() {
           : 'bg-surface-container-lowest/95 backdrop-blur-md shadow-[0_1px_8px_rgba(0,0,0,0.04)]'
       }`}
     >
-      {/* Top Technical Info Strip */}
-      <div className="bg-surface-container-high px-gutter py-space-xs text-center border-b border-surface-container-highest hidden sm:block">
-        <div className="max-w-7xl mx-auto flex items-center justify-between font-label-technical text-label-technical uppercase tracking-widest text-on-surface-variant text-[11px]">
-          <div className="flex items-center gap-space-xs">
-            <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-            <span>DIN EN ISO Calibrated • {initialSettings.standardTolerance} Tolerance Standard</span>
-          </div>
-          <div className="flex items-center gap-space-md">
-            <span>Active Bays: {initialSettings.activeBays}/{initialSettings.totalBays}</span>
-            <span>•</span>
-            <span>Turnaround Lead: 48h</span>
-            <span>•</span>
-            <span className="text-primary font-semibold">GUINDY SIDCO UNIT</span>
-          </div>
-        </div>
-      </div>
-
       {/* Main Navigation Bar */}
       <div className="h-20 max-w-7xl mx-auto px-gutter flex items-center justify-between">
         {/* Brand Logo & Title */}

@@ -21,9 +21,6 @@ export default async function AdminDashboardPage() {
         {/* Header Bar */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-space-md border-b border-outline-variant/40 pb-space-md">
           <div className="flex flex-col">
-            <span className="font-label-technical text-xs uppercase tracking-widest text-primary font-bold">
-              OPERATIONAL TELEMETRY // SIDCO GUINDY
-            </span>
             <h1 className="font-display-xl text-headline-lg uppercase text-on-surface tracking-tight">
               Workshop Admin Dashboard
             </h1>

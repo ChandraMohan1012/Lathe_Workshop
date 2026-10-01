@@ -22,13 +22,6 @@ export default async function OngoingPage() {
         {/* HERO HEADER */}
         <section className="w-full bg-surface-container-lowest px-gutter py-space-2xl border-b border-outline-variant/30">
           <div className="max-w-7xl mx-auto flex flex-col gap-space-md">
-            <div className="inline-flex items-center gap-2 w-max bg-primary-container text-on-primary-container px-space-md py-space-xs rounded-full">
-              <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-              <span className="font-label-technical text-xs uppercase tracking-widest font-semibold">
-                Live Shop Floor Telemetry // Active Bays
-              </span>
-            </div>
-
             <h1 className="font-display-xl text-display-xl-mobile sm:text-display-xl text-on-surface uppercase tracking-tight">
               Ongoing Workshop <span className="text-primary italic font-editorial-accent">Jobs</span>
             </h1>
@@ -44,19 +37,6 @@ export default async function OngoingPage() {
         {/* LIVE BAY TRACKER BOARD */}
         <section className="w-full px-gutter py-space-2xl bg-surface">
           <div className="max-w-7xl mx-auto flex flex-col gap-space-xl">
-            {/* Header info */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-surface-container-high p-space-md rounded-xl border border-outline-variant/40">
-              <div className="flex items-center gap-3">
-                <span className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span className="font-label-technical text-xs uppercase tracking-wider text-on-surface font-semibold">
-                  {initialSettings.activeBays} of {initialSettings.totalBays} Bays Currently Active
-                </span>
-              </div>
-              <span className="font-label-technical text-xs text-on-surface-variant uppercase">
-                Last System Sync: Just now
-              </span>
-            </div>
-
             {/* Jobs Cards Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-space-lg">
               {liveJobs.map((job) => (

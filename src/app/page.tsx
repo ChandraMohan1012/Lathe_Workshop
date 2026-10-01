@@ -29,13 +29,6 @@ export default async function HomePage() {
           <div className="relative max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-space-xl items-center">
             {/* Left Content */}
             <div className="lg:col-span-7 flex flex-col gap-space-md hero-animate-1">
-              <div className="inline-flex items-center gap-space-xs w-max bg-surface-container px-space-md py-space-xs rounded-full">
-                <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-                <span className="font-label-technical text-xs uppercase tracking-widest text-on-surface font-semibold">
-                  Subtractive Precision Tooling // Guindy SIDCO
-                </span>
-              </div>
-
               <h1 className="font-display-xl text-display-xl-mobile sm:text-display-xl text-on-surface uppercase tracking-tight leading-tight">
                 High-Tolerance <br />
                 <span className="text-primary italic font-editorial-accent lowercase">lathe</span> Machining
@@ -216,10 +209,6 @@ export default async function HomePage() {
           <div className="max-w-7xl mx-auto flex flex-col gap-space-xl">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-space-md border-b border-outline-variant/40 pb-space-md">
               <div>
-                <span className="font-label-technical text-xs uppercase tracking-widest text-primary font-semibold flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-                  Live Shop Floor Telemetry
-                </span>
                 <h2 className="font-display-xl text-headline-lg uppercase tracking-tight text-on-surface mt-1">
                   Active Turning Bay Jobs
                 </h2>

@@ -17,12 +17,6 @@ export default function WorkCard({ project }: WorkCardProps) {
           fill
           className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
         />
-        <div className="absolute top-3 left-3 bg-surface-container-lowest/90 backdrop-blur-sm px-3 py-1 rounded-full font-label-technical text-[10px] uppercase tracking-widest text-primary font-semibold border border-outline-variant/40">
-          {project.category}
-        </div>
-        <div className="absolute bottom-3 right-3 bg-inverse-surface/90 text-inverse-on-surface px-2.5 py-1 rounded-md font-label-technical text-[10px] uppercase tracking-widest">
-          {project.tolerance}
-        </div>
       </div>
 
       {/* Content */}

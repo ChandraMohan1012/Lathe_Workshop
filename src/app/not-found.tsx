@@ -14,10 +14,6 @@ export default function NotFound() {
             <span className="material-symbols-outlined text-4xl">error_med</span>
           </div>
 
-          <div className="inline-flex items-center gap-2 bg-surface-container px-3 py-1 rounded-full text-on-surface-variant font-label-technical text-xs uppercase tracking-widest font-semibold">
-            STATUS CODE // 404 NOT FOUND
-          </div>
-
           <h1 className="font-display-xl text-display-xl-mobile sm:text-display-xl uppercase tracking-tight text-on-surface">
             Tool Axis <span className="text-primary italic font-editorial-accent">Not Found</span>
           </h1>

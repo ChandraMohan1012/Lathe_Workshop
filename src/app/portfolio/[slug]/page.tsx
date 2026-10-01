@@ -58,10 +58,6 @@ export default async function PortfolioDetailPage({ params }: PageProps) {
           <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-space-xl items-center">
             {/* Left Info */}
             <div className="lg:col-span-6 flex flex-col gap-space-md">
-              <div className="inline-flex items-center gap-2 bg-primary-container text-on-primary-container px-3 py-1 rounded-full w-max font-label-technical text-xs uppercase tracking-wider font-semibold">
-                {project.category}
-              </div>
-
               <h1 className="font-display-xl text-display-xl-mobile sm:text-headline-lg text-on-surface uppercase tracking-tight">
                 {project.title}
               </h1>

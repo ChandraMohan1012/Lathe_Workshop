@@ -20,13 +20,6 @@ export default function AboutPage() {
         {/* HERO HEADER */}
         <section className="w-full bg-surface-container-lowest px-gutter py-space-2xl border-b border-outline-variant/30">
           <div className="max-w-7xl mx-auto flex flex-col gap-space-md">
-            <div className="inline-flex items-center gap-space-xs w-max bg-surface-container px-space-md py-space-xs rounded-full">
-              <span className="w-2 h-2 rounded-full bg-primary font-semibold"></span>
-              <span className="font-label-technical text-xs uppercase tracking-widest text-on-surface">
-                Precision Engineering Heritage // Guindy SIDCO
-              </span>
-            </div>
-
             <h1 className="font-display-xl text-display-xl-mobile sm:text-display-xl text-on-surface uppercase tracking-tight">
               Machining Heritage & <span className="text-primary italic font-editorial-accent">Craft</span>
             </h1>
@@ -54,9 +47,6 @@ export default function AboutPage() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-space-lg">
                   <div className="text-white flex flex-col gap-1">
                     <span className="font-headline-sm text-lg uppercase tracking-tight">Master Craftsmanship</span>
-                    <span className="font-label-technical text-xs text-primary-fixed-dim uppercase tracking-wider">
-                      Guindy SIDCO Workshop Floor
-                    </span>
                   </div>
                 </div>
               </div>
@@ -64,10 +54,6 @@ export default function AboutPage() {
 
             {/* Heritage Narrative */}
             <div className="lg:col-span-7 flex flex-col gap-space-md">
-              <span className="font-label-technical text-xs uppercase tracking-widest text-primary font-bold">
-                OUR STORY // CRAFTING WITH MICROMETER INTEGRITY
-              </span>
-
               <h2 className="font-display-xl text-headline-lg uppercase tracking-tight text-on-surface">
                 Uncompromising Subtractive Precision
               </h2>
@@ -102,9 +88,6 @@ export default function AboutPage() {
         <section className="w-full bg-surface-container-low px-gutter py-space-2xl border-t border-outline-variant/30">
           <div className="max-w-7xl mx-auto flex flex-col gap-space-xl">
             <div className="flex flex-col gap-1 text-center">
-              <span className="font-label-technical text-xs uppercase tracking-widest text-primary font-semibold">
-                Facility Overview
-              </span>
               <h2 className="font-display-xl text-headline-lg uppercase tracking-tight text-on-surface">
                 Modern Lathe Workshop Floor
               </h2>

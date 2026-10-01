@@ -30,10 +30,6 @@ export default function Footer() {
             <p className="font-body-md text-surface-dim max-w-sm">
               Dedicated to subtractive precision manufacturing, high-tolerance lathe turning, and custom industrial component tooling in Guindy SIDCO Industrial Estate.
             </p>
-            <div className="font-label-technical text-[11px] text-primary-fixed-dim uppercase tracking-wider flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-primary-fixed-dim animate-pulse"></span>
-              <span>CALIBRATED TOLERANCE: {initialSettings.standardTolerance}</span>
-            </div>
           </div>
 
           {/* Quick Links Column */}

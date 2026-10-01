@@ -21,13 +21,6 @@ export default async function PortfolioPage() {
         {/* HEADER SECTION */}
         <section className="w-full bg-surface-container-lowest px-gutter py-space-2xl border-b border-outline-variant/30">
           <div className="max-w-7xl mx-auto flex flex-col gap-space-md">
-            <div className="inline-flex items-center gap-space-xs w-max bg-surface-container px-space-md py-space-xs rounded-full">
-              <span className="w-2 h-2 rounded-full bg-primary font-semibold"></span>
-              <span className="font-label-technical text-xs uppercase tracking-widest text-on-surface">
-                Component Showcase // Machining Deliverables
-              </span>
-            </div>
-
             <h1 className="font-display-xl text-display-xl-mobile sm:text-display-xl text-on-surface uppercase tracking-tight">
               Machined Works <span className="text-primary italic font-editorial-accent">Catalog</span>
             </h1>

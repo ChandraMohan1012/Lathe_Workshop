@@ -71,13 +71,6 @@ export default function ServicesPage() {
         {/* HERO HEADER */}
         <section className="w-full bg-surface-container-lowest px-gutter py-space-2xl border-b border-outline-variant/30">
           <div className="max-w-7xl mx-auto flex flex-col gap-space-md">
-            <div className="inline-flex items-center gap-space-xs w-max bg-surface-container px-space-md py-space-xs rounded-full">
-              <span className="w-2 h-2 rounded-full bg-primary font-semibold"></span>
-              <span className="font-label-technical text-xs uppercase tracking-widest text-on-surface">
-                What We Do // Subtractive Engineering
-              </span>
-            </div>
-
             <h1 className="font-display-xl text-display-xl-mobile sm:text-display-xl text-on-surface uppercase tracking-tight">
               Precision Lathe <span className="text-primary italic font-editorial-accent">Services</span>
             </h1>
@@ -103,9 +96,6 @@ export default function ServicesPage() {
                   <div className="w-14 h-14 rounded-2xl bg-primary-container text-on-primary-container flex items-center justify-center">
                     <span className="material-symbols-outlined text-3xl">{service.icon}</span>
                   </div>
-                  <span className="font-label-technical text-xs text-primary font-bold uppercase tracking-widest">
-                    SERVICE // 0{idx + 1}
-                  </span>
                   <h3 className="font-headline-sm text-2xl uppercase tracking-tight text-on-surface">
                     {service.title}
                   </h3>

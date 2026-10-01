@@ -74,13 +74,6 @@ export default function ContactPage() {
         {/* HERO HEADER */}
         <section className="w-full bg-surface-container-lowest px-gutter py-space-2xl border-b border-outline-variant/30">
           <div className="max-w-7xl mx-auto flex flex-col gap-space-md">
-            <div className="inline-flex items-center gap-space-xs w-max bg-surface-container px-space-md py-space-xs rounded-full">
-              <span className="w-2 h-2 rounded-full bg-primary font-semibold"></span>
-              <span className="font-label-technical text-xs uppercase tracking-widest text-on-surface">
-                Technical Quotations // Guindy SIDCO Desk
-              </span>
-            </div>
-
             <h1 className="font-display-xl text-display-xl-mobile sm:text-display-xl text-on-surface uppercase tracking-tight">
               Request Workshop <span className="text-primary italic font-editorial-accent">Quotation</span>
             </h1>
@@ -140,10 +133,6 @@ export default function ContactPage() {
                   </div>
                 </div>
 
-                <div className="pt-space-md border-t border-outline-variant/30 font-label-technical text-xs text-primary uppercase font-semibold flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-                  Bays 01-14 Accepting Immediate Orders
-                </div>
               </div>
             </div>
 

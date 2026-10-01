@@ -29,9 +29,6 @@ export default function FaqAccordion({
       <div className="max-w-4xl mx-auto flex flex-col gap-space-lg">
         {/* Header */}
         <div className="flex flex-col gap-space-xs text-center">
-          <span className="font-label-technical text-label-technical uppercase tracking-widest text-primary font-semibold">
-            FAQ // Technical Blueprint Clarifications
-          </span>
           <h2 className="font-display-xl text-headline-lg uppercase tracking-tight text-on-surface">
             {title}
           </h2>

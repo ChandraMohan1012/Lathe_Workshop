@@ -20,10 +20,6 @@ export default function CtaBand({
 
       <div className="relative max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-space-lg">
         <div className="flex flex-col gap-space-xs max-w-3xl text-center lg:text-left">
-          <div className="inline-flex items-center gap-2 self-center lg:self-start bg-primary/10 px-3 py-1 rounded-full text-on-primary-container font-label-technical text-xs uppercase tracking-widest font-semibold">
-            <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-            Guindy SIDCO Machining Facility
-          </div>
           <h2 className="font-display-xl text-display-xl-mobile sm:text-headline-lg uppercase tracking-tight text-on-primary-container mt-2">
             {title}
           </h2>
