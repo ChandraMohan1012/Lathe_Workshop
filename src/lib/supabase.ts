@@ -14,7 +14,7 @@ export const supabase = isSupabaseConfigured
   : null;
 
 // Helper: Get authenticated Supabase client for client-side write calls
-function getAuthClient() {
+export function getAuthClient() {
   if (typeof window !== 'undefined' && isSupabaseConfigured) {
     return createSupabaseBrowserClient();
   }

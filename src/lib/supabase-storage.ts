@@ -1,11 +1,20 @@
-import { supabase, isSupabaseConfigured } from './supabase';
+import { supabase, isSupabaseConfigured, getAuthClient } from './supabase';
 
 export async function uploadProjectImage(file: File): Promise<{ success: boolean; url: string; error?: string }> {
-  if (!isSupabaseConfigured || !supabase) {
+  if (!isSupabaseConfigured) {
     return {
       success: false,
       url: '',
       error: 'Supabase Storage is not configured. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in environment variables.',
+    };
+  }
+
+  const client = getAuthClient();
+  if (!client) {
+    return {
+      success: false,
+      url: '',
+      error: 'Supabase client unavailable.',
     };
   }
 
@@ -24,7 +33,7 @@ export async function uploadProjectImage(file: File): Promise<{ success: boolean
     const fileName = `project_${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
     const filePath = `catalog/${fileName}`;
 
-    const { error: uploadError } = await supabase.storage
+    const { error: uploadError } = await client.storage
       .from('project-images')
       .upload(filePath, file, {
         cacheControl: '3600',
@@ -39,7 +48,7 @@ export async function uploadProjectImage(file: File): Promise<{ success: boolean
       };
     }
 
-    const { data } = supabase.storage.from('project-images').getPublicUrl(filePath);
+    const { data } = client.storage.from('project-images').getPublicUrl(filePath);
     return { success: true, url: data.publicUrl };
   } catch (err: any) {
     return { success: false, url: '', error: err?.message || 'Storage upload failed' };
