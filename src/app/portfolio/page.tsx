@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   description: 'Explore Lathe Pattarai portfolio of precision turned brass components, heavy duty stainless steel drive shafts, and high-tolerance tool steel punch dies.',
 };
 
+export const dynamic = 'force-dynamic';
+
 export default async function PortfolioPage() {
   const projects = await getProjects();
 

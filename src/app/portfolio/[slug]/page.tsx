@@ -23,6 +23,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
+export const dynamic = 'force-dynamic';
+
 export default async function PortfolioDetailPage({ params }: PageProps) {
   const project = await getProjectBySlug(params.slug);
   if (!project) notFound();

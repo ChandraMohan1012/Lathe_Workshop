@@ -11,6 +11,8 @@ export const metadata: Metadata = {
   description: 'Explore Lathe Pattarai specialized machining capabilities: high-precision lathe turning, brass component milling, shaft threading, and emergency prototype retooling.',
 };
 
+export const dynamic = 'force-dynamic';
+
 export default function ServicesPage() {
   const servicesList = [
     {

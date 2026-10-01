@@ -78,7 +78,7 @@ export default function Footer() {
             </h4>
             <ul className="flex flex-col gap-2 font-label-technical text-xs text-surface-dim uppercase tracking-wider">
               <li>Heavy Lathe Turning</li>
-              <li>Brass Component Milling</li>
+              <li>Brass Component Turning</li>
               <li>Thread Grooving & Sleeves</li>
               <li>Hardened Steel Retooling</li>
               <li>Prototype Tooling Runs</li>

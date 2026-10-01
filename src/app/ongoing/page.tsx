@@ -11,6 +11,8 @@ export const metadata: Metadata = {
   description: 'Track real-time active turning bay jobs, queue progress, and estimated completion times across our 16 lathe bays in Guindy SIDCO.',
 };
 
+export const dynamic = 'force-dynamic';
+
 export default async function OngoingPage() {
   const liveJobs = await getLiveJobs();
 

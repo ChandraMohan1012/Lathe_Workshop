@@ -10,6 +10,8 @@ import JsonLd from '@/components/JsonLd';
 import { getProjects, getLiveJobs } from '@/lib/supabase';
 import { mockFaqs, initialSettings } from '@/lib/mockData';
 
+export const dynamic = 'force-dynamic';
+
 export default async function HomePage() {
   const projects = await getProjects();
   const liveJobs = await getLiveJobs();
