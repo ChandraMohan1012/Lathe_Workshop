@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import AdminSidebar from '@/components/AdminSidebar';
+import AdminBaysManager from '@/components/AdminBaysManager';
 import { getEnquiries, getLiveJobs, getProjects, getWorkshopSettings } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
@@ -124,32 +125,8 @@ export default async function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* ACTIVE BAY STATUS OVERVIEW */}
-        <div className="bg-surface-container-lowest p-space-lg rounded-xl border border-outline-variant/50 flex flex-col gap-space-md shadow-xs">
-          <h2 className="font-headline-sm text-lg uppercase tracking-tight text-on-surface flex items-center gap-2 border-b border-outline-variant/30 pb-3">
-            <span className="material-symbols-outlined text-primary">engineering</span>
-            Active Turning Bays Operations
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-space-md">
-            {liveJobs.map((job) => (
-              <div key={job.id} className="p-space-md bg-surface-container-low rounded-lg border border-outline-variant/40 flex flex-col gap-2">
-                <div className="flex items-center justify-between font-label-technical text-xs uppercase">
-                  <span className="font-bold text-primary">{job.bayNumber}</span>
-                  <span className="text-on-surface-variant">{job.partReference}</span>
-                </div>
-                <div className="font-headline-sm text-sm uppercase text-on-surface">{job.jobTitle}</div>
-                <div className="flex justify-between items-center text-xs font-label-technical">
-                  <span>{job.material} • {job.tolerance}</span>
-                  <span className="font-bold text-primary">{job.progress}%</span>
-                </div>
-                <div className="w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
-                  <div className="bg-primary h-full rounded-full" style={{ width: `${job.progress}%` }} />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        {/* ACTIVE BAY STATUS OVERVIEW & CONTROLS */}
+        <AdminBaysManager initialJobs={liveJobs} />
 
         {/* Note: System states, skeletons and feedback modules block intentionally omitted as per rule 5 */}
       </main>

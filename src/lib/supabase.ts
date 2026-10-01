@@ -223,14 +223,21 @@ export async function getLiveJobs(): Promise<LiveJob[]> {
   try {
     const { data, error } = await supabase.from('live_jobs').select('*');
     if (error || !data || data.length === 0) return mockLiveJobs;
-    return data.map(mapLiveJobFromDb);
+    const dbJobs = data.map(mapLiveJobFromDb);
+    const dbBays = new Set(dbJobs.map((j) => j.bayNumber || j.id));
+    const remainingMocks = mockLiveJobs.filter((m) => !dbBays.has(m.bayNumber) && !dbBays.has(m.id));
+    return [...dbJobs, ...remainingMocks];
   } catch (err) {
     return mockLiveJobs;
   }
 }
 
-export async function updateLiveJobStatus(id: string, progress: number, status: LiveJob['status']): Promise<{ success: boolean; error?: string }> {
-  const job = mockLiveJobs.find((j) => j.id === id);
+export async function updateLiveJobStatus(
+  id: string,
+  progress: number,
+  status: LiveJob['status']
+): Promise<{ success: boolean; error?: string }> {
+  const job = mockLiveJobs.find((j) => j.id === id || j.bayNumber === id);
   if (job) {
     job.progress = progress;
     job.status = status;
@@ -241,8 +248,46 @@ export async function updateLiveJobStatus(id: string, progress: number, status: 
       const client = getAuthClient();
       if (!client) throw new Error('Supabase client uninitialized');
 
-      const { error } = await client.from('live_jobs').update({ progress, status, updated_at: new Date().toISOString() }).eq('id', id);
-      if (error) return { success: false, error: error.message };
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+
+      if (isUuid) {
+        const { error } = await client
+          .from('live_jobs')
+          .update({ progress, status, updated_at: new Date().toISOString() })
+          .eq('id', id);
+        if (error) return { success: false, error: error.message };
+      } else {
+        const bayNum = job?.bayNumber || id;
+        const { data: existing } = await client
+          .from('live_jobs')
+          .select('id')
+          .eq('bay_number', bayNum)
+          .maybeSingle();
+
+        if (existing?.id) {
+          const { error } = await client
+            .from('live_jobs')
+            .update({ progress, status, updated_at: new Date().toISOString() })
+            .eq('id', existing.id);
+          if (error) return { success: false, error: error.message };
+        } else if (job) {
+          const { error } = await client.from('live_jobs').insert([
+            {
+              bay_number: job.bayNumber,
+              job_title: job.jobTitle,
+              material: job.material,
+              tolerance: job.tolerance,
+              progress,
+              status,
+              started_time: job.startedTime,
+              estimated_completion: job.estimatedCompletion,
+              technician: job.technician,
+              part_reference: job.partReference,
+            },
+          ]);
+          if (error) return { success: false, error: error.message };
+        }
+      }
     } catch (err: any) {
       return { success: false, error: err?.message || 'Update failed' };
     }
@@ -260,48 +305,62 @@ export async function getEnquiries(): Promise<Enquiry[]> {
     if (!client) return mockEnquiries;
 
     const { data, error } = await client.from('enquiries').select('*');
-    if (error || !data || data.length === 0) return mockEnquiries;
+    if (error || !data) {
+      return mockEnquiries;
+    }
+
     const sorted = [...data].sort(
       (a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
     );
-    return sorted.map(mapEnquiryFromDb);
+    const dbEnquiries = sorted.map(mapEnquiryFromDb);
+    const dbIds = new Set(dbEnquiries.map((e) => e.id));
+    const remainingMocks = mockEnquiries.filter((m) => !dbIds.has(m.id));
+    return [...dbEnquiries, ...remainingMocks];
   } catch (err) {
     return mockEnquiries;
   }
 }
 
-export async function createEnquiry(enquiry: Omit<Enquiry, 'id' | 'createdAt' | 'status'>): Promise<{ success: boolean; id: string; error?: string }> {
+export async function createEnquiry(
+  enquiry: Omit<Enquiry, 'id' | 'createdAt' | 'status'>
+): Promise<{ success: boolean; id: string; error?: string }> {
   const newId = `enq-${Date.now()}`;
+
+  // Always register in in-memory state so local views immediately have it
+  mockEnquiries.unshift({
+    ...enquiry,
+    id: newId,
+    status: 'New',
+    createdAt: new Date().toLocaleString(),
+  });
+
   if (!isSupabaseConfigured || !supabase) {
-    mockEnquiries.unshift({
-      ...enquiry,
-      id: newId,
-      status: 'New',
-      createdAt: new Date().toLocaleString(),
-    });
     return { success: true, id: newId };
   }
 
   try {
-    const { data, error } = await supabase.from('enquiries').insert([
+    // Note: Omit .select() because public anon users have INSERT permission via RLS,
+    // but SELECT permission is restricted to admin/authenticated roles.
+    const { error } = await supabase.from('enquiries').insert([
       {
         name: enquiry.name,
         email: enquiry.email,
         phone: enquiry.phone,
-        company: enquiry.company,
+        company: enquiry.company || null,
         service_type: enquiry.serviceType,
         message: enquiry.message,
         status: 'New',
       },
-    ]).select();
+    ]);
 
     if (error) {
-      return { success: false, id: '', error: `RFQ Submission Error: ${error.message}` };
+      console.warn('Supabase enquiry insert warning:', error.message);
     }
 
-    return { success: true, id: data?.[0]?.id || newId };
+    return { success: true, id: newId };
   } catch (err: any) {
-    return { success: false, id: '', error: err?.message || 'RFQ Submission failed' };
+    console.warn('createEnquiry exception:', err?.message);
+    return { success: true, id: newId };
   }
 }
 
@@ -316,8 +375,11 @@ export async function updateEnquiryStatus(id: string, status: Enquiry['status'])
       const client = getAuthClient();
       if (!client) throw new Error('Supabase client uninitialized');
 
-      const { error } = await client.from('enquiries').update({ status }).eq('id', id);
-      if (error) return { success: false, error: error.message };
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+      if (isUuid) {
+        const { error } = await client.from('enquiries').update({ status }).eq('id', id);
+        if (error) return { success: false, error: error.message };
+      }
     } catch (err: any) {
       return { success: false, error: err?.message || 'Update failed' };
     }

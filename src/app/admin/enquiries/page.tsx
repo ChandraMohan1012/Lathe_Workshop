@@ -10,12 +10,21 @@ export default function AdminEnquiriesPage() {
   const [enquiries, setEnquiries] = useState<Enquiry[]>(mockEnquiries);
   const [filter, setFilter] = useState('All');
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const fetchEnquiries = async () => {
+    setRefreshing(true);
+    try {
+      const data = await getEnquiries();
+      setEnquiries(data);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
 
   useEffect(() => {
-    getEnquiries().then((data) => {
-      setEnquiries(data);
-      setLoading(false);
-    });
+    fetchEnquiries();
   }, []);
 
   const filteredEnquiries = enquiries.filter((e) => filter === 'All' || e.status === filter);
@@ -42,21 +51,37 @@ export default function AdminEnquiriesPage() {
             </h1>
           </div>
 
-          {/* Filter pills */}
-          <div className="flex items-center gap-2 font-label-technical text-xs uppercase font-semibold">
-            {['All', 'New', 'Quoted', 'Closed'].map((st) => (
-              <button
-                key={st}
-                onClick={() => setFilter(st)}
-                className={`px-3 py-1.5 rounded-full transition-colors ${
-                  filter === st
-                    ? 'bg-primary text-on-primary font-bold'
-                    : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high'
-                }`}
-              >
-                {st}
-              </button>
-            ))}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={fetchEnquiries}
+              disabled={refreshing}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high border border-outline-variant/50 text-on-surface font-label-technical text-xs uppercase font-semibold transition-colors disabled:opacity-50"
+            >
+              <span className={`material-symbols-outlined text-sm ${refreshing ? 'animate-spin' : ''}`}>
+                refresh
+              </span>
+              <span>{refreshing ? 'Refreshing...' : 'Refresh RFQs'}</span>
+            </button>
+
+            {/* Filter pills */}
+            <div className="flex items-center gap-1.5 font-label-technical text-xs uppercase font-semibold">
+              {['All', 'New', 'In Review', 'Quoted', 'Closed'].map((st) => {
+                const count = st === 'All' ? enquiries.length : enquiries.filter((e) => e.status === st).length;
+                return (
+                  <button
+                    key={st}
+                    onClick={() => setFilter(st)}
+                    className={`px-3 py-1.5 rounded-full transition-colors ${
+                      filter === st
+                        ? 'bg-primary text-on-primary font-bold'
+                        : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high'
+                    }`}
+                  >
+                    {st} {count > 0 && <span className="opacity-75">({count})</span>}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
 

@@ -18,14 +18,14 @@ export default function Footer({ settings = initialSettings }: FooterProps) {
               <div className="relative h-10 w-10 flex-shrink-0 bg-surface rounded-md p-1">
                 <Image
                   src="/images/logo.png"
-                  alt="Lathe Pattarai Logo"
+                  alt={`${settings.workshopName} Logo`}
                   fill
                   className="object-contain p-1"
                 />
               </div>
               <div className="flex flex-col">
                 <span className="font-headline-sm text-headline-sm uppercase tracking-tight text-white">
-                  Lathe Pattarai
+                  {settings.workshopName}
                 </span>
                 <span className="font-label-technical text-[10px] uppercase tracking-widest text-primary-fixed-dim">
                   Precision Engineering Workshop
