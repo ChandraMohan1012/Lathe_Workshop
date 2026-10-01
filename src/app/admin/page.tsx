@@ -3,10 +3,7 @@ import AdminSidebar from '@/components/AdminSidebar';
 import { getEnquiries, getLiveJobs, getProjects } from '@/lib/supabase';
 import { initialSettings } from '@/lib/mockData';
 
-export const metadata = {
-  title: 'Admin Dashboard | Lathe Pattarai',
-  robots: { index: false, follow: false },
-};
+export const dynamic = 'force-dynamic';
 
 export default async function AdminDashboardPage() {
   const enquiries = await getEnquiries();

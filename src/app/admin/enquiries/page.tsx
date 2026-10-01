@@ -1,19 +1,30 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AdminSidebar from '@/components/AdminSidebar';
+import { getEnquiries, updateEnquiryStatus } from '@/lib/supabase';
+import { Enquiry } from '@/types';
 import { mockEnquiries } from '@/lib/mockData';
 
 export default function AdminEnquiriesPage() {
-  const [enquiries, setEnquiries] = useState(mockEnquiries);
+  const [enquiries, setEnquiries] = useState<Enquiry[]>(mockEnquiries);
   const [filter, setFilter] = useState('All');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getEnquiries().then((data) => {
+      setEnquiries(data);
+      setLoading(false);
+    });
+  }, []);
 
   const filteredEnquiries = enquiries.filter((e) => filter === 'All' || e.status === filter);
 
-  const updateStatus = (id: string, newStatus: 'New' | 'In Review' | 'Quoted' | 'Closed') => {
+  const handleUpdateStatus = async (id: string, newStatus: Enquiry['status']) => {
     setEnquiries((prev) =>
       prev.map((e) => (e.id === id ? { ...e, status: newStatus } : e))
     );
+    await updateEnquiryStatus(id, newStatus);
   };
 
   return (
@@ -79,7 +90,7 @@ export default function AdminEnquiriesPage() {
                     </span>
                     <select
                       value={enq.status}
-                      onChange={(e) => updateStatus(enq.id, e.target.value as any)}
+                      onChange={(e) => handleUpdateStatus(enq.id, e.target.value as any)}
                       className="px-3 py-1 rounded-full bg-primary-container text-on-primary-container font-label-technical text-xs uppercase font-bold focus:outline-none"
                     >
                       <option value="New">New</option>

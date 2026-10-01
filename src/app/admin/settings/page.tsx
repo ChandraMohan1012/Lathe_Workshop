@@ -1,18 +1,37 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AdminSidebar from '@/components/AdminSidebar';
 import { initialSettings } from '@/lib/mockData';
+import { getWorkshopSettings, updateWorkshopSettings } from '@/lib/supabase';
+import { WorkshopSettings } from '@/types';
 
 export default function AdminSettingsPage() {
-  const [settings, setSettings] = useState(initialSettings);
+  const [settings, setSettings] = useState<WorkshopSettings>(initialSettings);
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    getWorkshopSettings().then((res) => {
+      if (res) setSettings(res);
+    });
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    Object.assign(initialSettings, settings);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+    setSaving(true);
+    setError('');
+
+    const res = await updateWorkshopSettings(settings);
+    setSaving(false);
+
+    if (res.success) {
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } else {
+      setError(res.error || 'Failed to update settings in Supabase');
+    }
   };
 
   return (
@@ -33,6 +52,13 @@ export default function AdminSettingsPage() {
           <div className="bg-emerald-100 text-emerald-900 border border-emerald-300 p-space-md rounded-xl font-label-technical text-xs uppercase font-bold flex items-center gap-2">
             <span className="material-symbols-outlined">check_circle</span>
             <span>Workshop settings updated successfully!</span>
+          </div>
+        )}
+
+        {error && (
+          <div className="bg-red-100 text-red-900 border border-red-300 p-space-md rounded-xl font-label-technical text-xs uppercase font-bold flex items-center gap-2">
+            <span className="material-symbols-outlined">error</span>
+            <span>{error}</span>
           </div>
         )}
 
