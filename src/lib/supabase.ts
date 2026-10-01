@@ -101,10 +101,15 @@ function mapEnquiryFromDb(row: any): Enquiry {
 export async function getProjects(): Promise<Project[]> {
   if (!isSupabaseConfigured || !supabase) return mockProjects;
   try {
-    const { data, error } = await supabase.from('projects').select('*').order('created_at', { ascending: false });
+    const { data, error } = await supabase.from('projects').select('*');
     if (error || !data || data.length === 0) return mockProjects;
     
-    const dbProjects = data.map(mapProjectFromDb);
+    // Sort newest first
+    const sorted = [...data].sort(
+      (a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
+    );
+
+    const dbProjects = sorted.map(mapProjectFromDb);
     const existingSlugs = new Set(dbProjects.map((p) => p.slug));
     const existingIds = new Set(dbProjects.map((p) => p.id));
     const remainingMock = mockProjects.filter((m) => !existingSlugs.has(m.slug) && !existingIds.has(m.id));
@@ -240,9 +245,12 @@ export async function getEnquiries(): Promise<Enquiry[]> {
     const client = getAuthClient();
     if (!client) return mockEnquiries;
 
-    const { data, error } = await client.from('enquiries').select('*').order('created_at', { ascending: false });
+    const { data, error } = await client.from('enquiries').select('*');
     if (error || !data || data.length === 0) return mockEnquiries;
-    return data.map(mapEnquiryFromDb);
+    const sorted = [...data].sort(
+      (a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
+    );
+    return sorted.map(mapEnquiryFromDb);
   } catch (err) {
     return mockEnquiries;
   }
