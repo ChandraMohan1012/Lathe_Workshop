@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import AdminSidebar from '@/components/AdminSidebar';
-import { getEnquiries, getLiveJobs, getProjects } from '@/lib/supabase';
-import { initialSettings } from '@/lib/mockData';
+import { getEnquiries, getLiveJobs, getProjects, getWorkshopSettings } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,6 +8,7 @@ export default async function AdminDashboardPage() {
   const enquiries = await getEnquiries();
   const liveJobs = await getLiveJobs();
   const projects = await getProjects();
+  const settings = await getWorkshopSettings();
 
   return (
     <div className="flex min-h-screen bg-surface">
@@ -47,7 +47,7 @@ export default async function AdminDashboardPage() {
           <div className="bg-surface-container-lowest p-space-lg rounded-xl border border-outline-variant/50 flex flex-col justify-between">
             <span className="font-label-technical text-xs text-on-surface-variant uppercase">Active Turning Bays</span>
             <div className="flex items-baseline justify-between mt-2">
-              <span className="font-display-xl text-3xl font-bold text-primary">{initialSettings.activeBays} / {initialSettings.totalBays}</span>
+              <span className="font-display-xl text-3xl font-bold text-primary">{settings.activeBays} / {settings.totalBays}</span>
               <span className="font-label-technical text-xs text-emerald-600 font-semibold">Online</span>
             </div>
           </div>
@@ -63,7 +63,7 @@ export default async function AdminDashboardPage() {
           <div className="bg-surface-container-lowest p-space-lg rounded-xl border border-outline-variant/50 flex flex-col justify-between">
             <span className="font-label-technical text-xs text-on-surface-variant uppercase">Calibration Standard</span>
             <div className="flex items-baseline justify-between mt-2">
-              <span className="font-display-xl text-2xl font-bold text-on-surface">{initialSettings.standardTolerance}</span>
+              <span className="font-display-xl text-2xl font-bold text-on-surface">{settings.standardTolerance}</span>
               <span className="font-label-technical text-xs text-primary font-semibold">ISO 9001</span>
             </div>
           </div>

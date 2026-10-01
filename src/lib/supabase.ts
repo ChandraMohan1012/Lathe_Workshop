@@ -22,6 +22,80 @@ export function getAuthClient() {
 }
 
 // ==========================================
+// DB MAPPERS (camelCase <-> snake_case)
+// ==========================================
+function mapProjectFromDb(row: any): Project {
+  return {
+    id: String(row.id),
+    slug: row.slug ?? `project-${row.id}`,
+    title: row.title ?? '',
+    category: row.category ?? 'Precision Turning',
+    material: row.material ?? '',
+    tolerance: row.tolerance ?? '±0.005mm',
+    quantity: row.quantity ?? '',
+    completionDate: row.completion_date ?? row.completionDate ?? new Date().toISOString().split('T')[0],
+    clientIndustry: row.client_industry ?? row.clientIndustry ?? 'General Engineering',
+    image: row.image ?? '/images/brass-components.png',
+    description: row.description ?? '',
+    specs: Array.isArray(row.specs) ? row.specs : [],
+    challenge: row.challenge ?? undefined,
+    solution: row.solution ?? undefined,
+    featured: Boolean(row.featured),
+  };
+}
+
+function mapProjectToDb(p: Partial<Project>): Record<string, any> {
+  const dbRow: Record<string, any> = {};
+  if (p.slug !== undefined) dbRow.slug = p.slug;
+  if (p.title !== undefined) dbRow.title = p.title;
+  if (p.category !== undefined) dbRow.category = p.category;
+  if (p.material !== undefined) dbRow.material = p.material;
+  if (p.tolerance !== undefined) dbRow.tolerance = p.tolerance;
+  if (p.quantity !== undefined) dbRow.quantity = p.quantity;
+  if (p.completionDate !== undefined) dbRow.completion_date = p.completionDate;
+  if (p.clientIndustry !== undefined) dbRow.client_industry = p.clientIndustry;
+  if (p.image !== undefined) dbRow.image = p.image;
+  if (p.description !== undefined) dbRow.description = p.description;
+  if (p.specs !== undefined) dbRow.specs = p.specs;
+  if (p.challenge !== undefined) dbRow.challenge = p.challenge;
+  if (p.solution !== undefined) dbRow.solution = p.solution;
+  if (p.featured !== undefined) dbRow.featured = p.featured;
+  dbRow.updated_at = new Date().toISOString();
+  return dbRow;
+}
+
+function mapLiveJobFromDb(row: any): LiveJob {
+  return {
+    id: String(row.id),
+    bayNumber: row.bay_number ?? row.bayNumber ?? '',
+    jobTitle: row.job_title ?? row.jobTitle ?? '',
+    material: row.material ?? '',
+    tolerance: row.tolerance ?? '',
+    progress: Number(row.progress ?? 0),
+    status: row.status ?? 'In Progress',
+    startedTime: row.started_time ?? row.startedTime ?? '',
+    estimatedCompletion: row.estimated_completion ?? row.estimatedCompletion ?? '',
+    technician: row.technician ?? '',
+    partReference: row.part_reference ?? row.partReference ?? '',
+  };
+}
+
+function mapEnquiryFromDb(row: any): Enquiry {
+  return {
+    id: String(row.id),
+    name: row.name ?? '',
+    email: row.email ?? '',
+    phone: row.phone ?? '',
+    company: row.company ?? undefined,
+    serviceType: row.service_type ?? row.serviceType ?? 'General Machining',
+    message: row.message ?? '',
+    drawingUrl: row.drawing_url ?? row.drawingUrl ?? undefined,
+    status: row.status ?? 'New',
+    createdAt: row.created_at ? new Date(row.created_at).toLocaleString() : new Date().toLocaleString(),
+  };
+}
+
+// ==========================================
 // 1. PROJECTS CRUD
 // ==========================================
 export async function getProjects(): Promise<Project[]> {
@@ -29,7 +103,7 @@ export async function getProjects(): Promise<Project[]> {
   try {
     const { data, error } = await supabase.from('projects').select('*').order('created_at', { ascending: false });
     if (error || !data || data.length === 0) return mockProjects;
-    return data as Project[];
+    return data.map(mapProjectFromDb);
   } catch (err) {
     return mockProjects;
   }
@@ -47,9 +121,10 @@ export async function getProjectById(id: string): Promise<Project | null> {
 
 export async function createProject(projectData: Omit<Project, 'id'>): Promise<{ success: boolean; id: string; error?: string }> {
   const newId = `proj-${Date.now()}`;
-  const newProject = { ...projectData, id: newId };
+  const dbPayload = mapProjectToDb(projectData);
 
   if (!isSupabaseConfigured) {
+    const newProject = { ...projectData, id: newId };
     mockProjects.unshift(newProject);
     return { success: true, id: newId };
   }
@@ -58,12 +133,13 @@ export async function createProject(projectData: Omit<Project, 'id'>): Promise<{
     const client = getAuthClient();
     if (!client) throw new Error('Supabase client uninitialized');
 
-    const { data, error } = await client.from('projects').insert([projectData]).select();
+    const { data, error } = await client.from('projects').insert([dbPayload]).select();
     if (error) {
       return { success: false, id: '', error: `Database Error: ${error.message}` };
     }
-    mockProjects.unshift((data?.[0] as Project) || newProject);
-    return { success: true, id: data?.[0]?.id || newId };
+    const createdProj = mapProjectFromDb(data?.[0] || { ...projectData, id: newId });
+    mockProjects.unshift(createdProj);
+    return { success: true, id: createdProj.id };
   } catch (err: any) {
     return { success: false, id: '', error: err?.message || 'Database insert failed' };
   }
@@ -80,7 +156,8 @@ export async function updateProject(id: string, updates: Partial<Project>): Prom
       const client = getAuthClient();
       if (!client) throw new Error('Supabase client uninitialized');
 
-      const { error } = await client.from('projects').update(updates).eq('id', id);
+      const dbPayload = mapProjectToDb(updates);
+      const { error } = await client.from('projects').update(dbPayload).eq('id', id);
       if (error) {
         return { success: false, error: `Database Update Error: ${error.message}` };
       }
@@ -121,7 +198,7 @@ export async function getLiveJobs(): Promise<LiveJob[]> {
   try {
     const { data, error } = await supabase.from('live_jobs').select('*');
     if (error || !data || data.length === 0) return mockLiveJobs;
-    return data as LiveJob[];
+    return data.map(mapLiveJobFromDb);
   } catch (err) {
     return mockLiveJobs;
   }
@@ -139,7 +216,7 @@ export async function updateLiveJobStatus(id: string, progress: number, status: 
       const client = getAuthClient();
       if (!client) throw new Error('Supabase client uninitialized');
 
-      const { error } = await client.from('live_jobs').update({ progress, status }).eq('id', id);
+      const { error } = await client.from('live_jobs').update({ progress, status, updated_at: new Date().toISOString() }).eq('id', id);
       if (error) return { success: false, error: error.message };
     } catch (err: any) {
       return { success: false, error: err?.message || 'Update failed' };
@@ -159,7 +236,7 @@ export async function getEnquiries(): Promise<Enquiry[]> {
 
     const { data, error } = await client.from('enquiries').select('*').order('created_at', { ascending: false });
     if (error || !data || data.length === 0) return mockEnquiries;
-    return data as Enquiry[];
+    return data.map(mapEnquiryFromDb);
   } catch (err) {
     return mockEnquiries;
   }
@@ -276,3 +353,4 @@ export async function updateWorkshopSettings(settings: Partial<WorkshopSettings>
   }
   return { success: true };
 }
+

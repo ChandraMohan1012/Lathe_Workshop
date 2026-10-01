@@ -63,7 +63,7 @@ export default function AdminEditWorkPage({ params }: EditPageProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
-    await updateProject(params.id, {
+    const res = await updateProject(params.id, {
       title,
       category,
       material,
@@ -73,9 +73,14 @@ export default function AdminEditWorkPage({ params }: EditPageProps) {
       description,
       image,
     });
+    setSubmitting(false);
 
-    alert('Project details updated successfully!');
-    router.push('/admin/work');
+    if (res.success) {
+      alert('Project details updated successfully!');
+      router.push('/admin/work');
+    } else {
+      alert('Failed to update project: ' + (res.error || 'Unknown error'));
+    }
   };
 
   if (loading) {

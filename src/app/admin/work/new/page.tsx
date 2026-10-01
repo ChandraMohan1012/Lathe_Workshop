@@ -39,7 +39,7 @@ export default function AdminNewWorkPage() {
     setSubmitting(true);
 
     const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-    await createProject({
+    const res = await createProject({
       slug: slug || `project-${Date.now()}`,
       title,
       category,
@@ -57,8 +57,14 @@ export default function AdminNewWorkPage() {
       featured: true,
     });
 
-    alert('New project published to catalog!');
-    router.push('/admin/work');
+    setSubmitting(false);
+
+    if (res.success) {
+      alert('New project published to catalog!');
+      router.push('/admin/work');
+    } else {
+      alert('Failed to publish project to catalog: ' + (res.error || 'Unknown error'));
+    }
   };
 
   return (

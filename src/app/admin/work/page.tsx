@@ -23,8 +23,12 @@ export default function AdminWorkListPage() {
 
   const handleDelete = async (id: string, title: string) => {
     if (!confirm(`Are you sure you want to delete "${title}" from the catalog?`)) return;
-    await deleteProject(id);
-    setProjects((prev) => prev.filter((p) => p.id !== id));
+    const res = await deleteProject(id);
+    if (res.success) {
+      setProjects((prev) => prev.filter((p) => p.id !== id));
+    } else {
+      alert('Failed to delete project: ' + (res.error || 'Unknown error'));
+    }
   };
 
   const filteredProjects = projects.filter(
