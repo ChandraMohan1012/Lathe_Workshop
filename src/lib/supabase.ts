@@ -103,7 +103,13 @@ export async function getProjects(): Promise<Project[]> {
   try {
     const { data, error } = await supabase.from('projects').select('*').order('created_at', { ascending: false });
     if (error || !data || data.length === 0) return mockProjects;
-    return data.map(mapProjectFromDb);
+    
+    const dbProjects = data.map(mapProjectFromDb);
+    const existingSlugs = new Set(dbProjects.map((p) => p.slug));
+    const existingIds = new Set(dbProjects.map((p) => p.id));
+    const remainingMock = mockProjects.filter((m) => !existingSlugs.has(m.slug) && !existingIds.has(m.id));
+    
+    return [...dbProjects, ...remainingMock];
   } catch (err) {
     return mockProjects;
   }
