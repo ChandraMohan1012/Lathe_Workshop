@@ -14,9 +14,14 @@ export default function AdminNewWorkPage() {
   const [material, setMaterial] = useState('');
   const [tolerance, setTolerance] = useState('±0.005mm');
   const [quantity, setQuantity] = useState('100 Units');
-  const [clientIndustry, setClientIndustry] = useState('');
+  const [clientIndustry, setClientIndustry] = useState('General Engineering');
   const [description, setDescription] = useState('');
   const [image, setImage] = useState('/images/brass-components.png');
+  const [featured, setFeatured] = useState(true);
+  const [specs, setSpecs] = useState<{ label: string; value: string }[]>([
+    { label: 'Outer Diameter', value: '40.00mm ± 0.005' },
+    { label: 'Surface Finish', value: 'Ra 0.4 µm Ground' },
+  ]);
   const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -34,11 +39,27 @@ export default function AdminNewWorkPage() {
     setUploading(false);
   };
 
+  const handleAddSpec = () => {
+    setSpecs([...specs, { label: '', value: '' }]);
+  };
+
+  const handleSpecChange = (index: number, field: 'label' | 'value', val: string) => {
+    const updated = [...specs];
+    updated[index][field] = val;
+    setSpecs(updated);
+  };
+
+  const handleRemoveSpec = (index: number) => {
+    setSpecs(specs.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
 
     const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    const validSpecs = specs.filter((s) => s.label.trim() && s.value.trim());
+
     const res = await createProject({
       slug: slug || `project-${Date.now()}`,
       title,
@@ -50,11 +71,8 @@ export default function AdminNewWorkPage() {
       clientIndustry: clientIndustry || 'General Engineering',
       image,
       description,
-      specs: [
-        { label: 'Outer Diameter', value: '40.00mm ± 0.005' },
-        { label: 'Surface Finish', value: 'Ra 0.4 µm Ground' },
-      ],
-      featured: true,
+      specs: validSpecs,
+      featured,
     });
 
     setSubmitting(false);
@@ -157,6 +175,19 @@ export default function AdminNewWorkPage() {
             </div>
           </div>
 
+          <div className="flex flex-col gap-1">
+            <label className="font-label-technical text-xs uppercase tracking-wider text-on-surface font-semibold">
+              Client / Target Industry
+            </label>
+            <input
+              type="text"
+              value={clientIndustry}
+              onChange={(e) => setClientIndustry(e.target.value)}
+              placeholder="e.g. Aerospace & Defense, Automotive, General Engineering"
+              className="px-space-md py-space-sm rounded-lg bg-surface-container-low border border-outline-variant/60 focus:outline-none focus:border-primary text-on-surface font-body-md text-sm"
+            />
+          </div>
+
           {/* Photo Upload Section */}
           <div className="flex flex-col gap-2 p-4 bg-surface-container-low rounded-xl border border-outline-variant/40">
             <label className="font-label-technical text-xs uppercase tracking-wider text-on-surface font-semibold">
@@ -177,6 +208,61 @@ export default function AdminNewWorkPage() {
                 <Image src={image} alt="Preview" fill className="object-cover" />
               </div>
             )}
+          </div>
+
+          {/* Dynamic Technical Specs Builder */}
+          <div className="flex flex-col gap-2 p-4 bg-surface-container-low rounded-xl border border-outline-variant/40">
+            <div className="flex items-center justify-between">
+              <label className="font-label-technical text-xs uppercase tracking-wider text-on-surface font-semibold">
+                Technical Specifications (JSONB)
+              </label>
+              <button
+                type="button"
+                onClick={handleAddSpec}
+                className="text-xs font-label-technical text-primary uppercase font-bold hover:underline"
+              >
+                + Add Spec Line
+              </button>
+            </div>
+            {specs.map((spec, idx) => (
+              <div key={idx} className="flex items-center gap-2">
+                <input
+                  type="text"
+                  placeholder="Parameter (e.g. Outer Diameter)"
+                  value={spec.label}
+                  onChange={(e) => handleSpecChange(idx, 'label', e.target.value)}
+                  className="flex-1 px-space-md py-1.5 rounded-lg bg-surface-container-lowest border border-outline-variant/60 text-xs font-body-md text-on-surface"
+                />
+                <input
+                  type="text"
+                  placeholder="Value (e.g. 40.00mm ± 0.005)"
+                  value={spec.value}
+                  onChange={(e) => handleSpecChange(idx, 'value', e.target.value)}
+                  className="flex-1 px-space-md py-1.5 rounded-lg bg-surface-container-lowest border border-outline-variant/60 text-xs font-body-md text-on-surface"
+                />
+                <button
+                  type="button"
+                  onClick={() => handleRemoveSpec(idx)}
+                  className="text-xs font-bold text-error px-2 py-1 hover:bg-error-container/40 rounded"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+
+          {/* Featured Toggle */}
+          <div className="flex items-center gap-3 p-3 bg-surface-container-low rounded-xl border border-outline-variant/40">
+            <input
+              type="checkbox"
+              id="featured-toggle"
+              checked={featured}
+              onChange={(e) => setFeatured(e.target.checked)}
+              className="w-4 h-4 text-primary rounded border-outline-variant focus:ring-primary"
+            />
+            <label htmlFor="featured-toggle" className="font-label-technical text-xs uppercase text-on-surface cursor-pointer font-semibold">
+              Feature this project on Home Page Showcase
+            </label>
           </div>
 
           <div className="flex flex-col gap-1">
@@ -205,3 +291,4 @@ export default function AdminNewWorkPage() {
     </div>
   );
 }
+

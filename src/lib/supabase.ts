@@ -102,10 +102,14 @@ export async function getProjects(): Promise<Project[]> {
   if (!isSupabaseConfigured || !supabase) return mockProjects;
   try {
     const { data, error } = await supabase.from('projects').select('*').order('created_at', { ascending: false });
-    if (error || !data || data.length === 0) return mockProjects;
-    return data.map(mapProjectFromDb);
+    if (error) {
+      console.error('Supabase error getting projects:', error.message);
+      return [];
+    }
+    return (data || []).map(mapProjectFromDb);
   } catch (err) {
-    return mockProjects;
+    console.error('Exception getting projects:', err);
+    return [];
   }
 }
 
@@ -197,10 +201,13 @@ export async function getLiveJobs(): Promise<LiveJob[]> {
   if (!isSupabaseConfigured || !supabase) return mockLiveJobs;
   try {
     const { data, error } = await supabase.from('live_jobs').select('*');
-    if (error || !data || data.length === 0) return mockLiveJobs;
-    return data.map(mapLiveJobFromDb);
+    if (error) {
+      console.error('Supabase error getting live_jobs:', error.message);
+      return [];
+    }
+    return (data || []).map(mapLiveJobFromDb);
   } catch (err) {
-    return mockLiveJobs;
+    return [];
   }
 }
 
@@ -232,13 +239,16 @@ export async function getEnquiries(): Promise<Enquiry[]> {
   if (!isSupabaseConfigured || !supabase) return mockEnquiries;
   try {
     const client = getAuthClient();
-    if (!client) return mockEnquiries;
+    if (!client) return [];
 
     const { data, error } = await client.from('enquiries').select('*').order('created_at', { ascending: false });
-    if (error || !data || data.length === 0) return mockEnquiries;
-    return data.map(mapEnquiryFromDb);
+    if (error) {
+      console.error('Supabase error getting enquiries:', error.message);
+      return [];
+    }
+    return (data || []).map(mapEnquiryFromDb);
   } catch (err) {
-    return mockEnquiries;
+    return [];
   }
 }
 
