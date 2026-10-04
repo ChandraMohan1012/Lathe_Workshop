@@ -6,8 +6,8 @@ import PortfolioFilterableGrid from '@/components/PortfolioFilterableGrid';
 import { getProjects, getWorkshopSettings } from '@/lib/supabase';
 
 export const metadata: Metadata = {
-  title: 'Machining Portfolio & Work Showcase',
-  description: 'Explore Lathe Pattarai portfolio of precision turned brass components, heavy duty stainless steel drive shafts, and high-tolerance tool steel punch dies.',
+  title: 'Machining Portfolio & Work Showcase | Erode',
+  description: 'Explore Lathe Pattarai portfolio of precision turned brass bushings, agricultural submersible pump shafts, textile loom components, and custom lathe job works in Erode.',
 };
 
 export const dynamic = 'force-dynamic';
@@ -31,7 +31,7 @@ export default async function PortfolioPage() {
             </h1>
 
             <p className="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">
-              High-tolerance turned bushings, multi-start threaded brass sleeves, marine stepped drive shafts, and aerospace actuator collars produced in our Guindy SIDCO facility.
+              Precision turned brass bushings, textile machinery rollers, agricultural submersible pump shafts, and custom flanged couplings machined in our Erode facility.
             </p>
           </div>
         </section>
@@ -44,8 +44,8 @@ export default async function PortfolioPage() {
         </section>
 
         <CtaBand
-          title="Have a Custom Mechanical Component Requirement?"
-          subtitle="Upload your CAD drawings or technical blueprints to receive an exact itemized quotation and lead-time schedule."
+          title="Need Custom Lathe Job Work or Replacement Parts?"
+          subtitle="Call or WhatsApp your drawing, sample part, or dimensions to get an instant quote."
           phone={settings.phone}
         />
       </main>

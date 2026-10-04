@@ -133,13 +133,33 @@ export default function ContactPage() {
                     <span className="material-symbols-outlined text-primary text-xl mt-0.5">call</span>
                     <div>
                       <strong className="text-on-surface block text-sm font-semibold">Direct Phone / WhatsApp</strong>
-                      <a href={`tel:${settings.phone}`} className="text-sm text-primary hover:underline">
+                      <a href={`tel:${settings.phone}`} className="text-sm text-primary font-mono font-bold hover:underline">
                         {settings.phone}
                       </a>
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-3">
+                  {/* Quick Local Contact Buttons */}
+                  <div className="flex flex-col sm:flex-row gap-2 pt-2">
+                    <a
+                      href={`https://wa.me/${(settings.whatsapp || initialSettings.whatsapp).replace(/[^0-9]/g, '')}?text=Hello%2C%20I%20have%20a%20lathe%20job%20work%20enquiry%20in%20Erode.`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-label-technical text-xs uppercase tracking-wider font-bold transition-all shadow-xs"
+                    >
+                      <span className="material-symbols-outlined text-base">chat</span>
+                      <span>WhatsApp Us</span>
+                    </a>
+                    <a
+                      href={`tel:${settings.phone}`}
+                      className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-on-primary font-label-technical text-xs uppercase tracking-wider font-bold transition-all shadow-xs"
+                    >
+                      <span className="material-symbols-outlined text-base">call</span>
+                      <span>Call Workshop</span>
+                    </a>
+                  </div>
+
+                  <div className="flex items-start gap-3 pt-2 border-t border-outline-variant/30">
                     <span className="material-symbols-outlined text-primary text-xl mt-0.5">mail</span>
                     <div>
                       <strong className="text-on-surface block text-sm font-semibold">Engineering Desk Email</strong>
@@ -180,7 +200,7 @@ export default function ContactPage() {
                       Quotation Request Submitted!
                     </div>
                     <p className="font-body-md text-sm">
-                      Your enquiry reference ID is <strong className="font-mono">{submittedId}</strong>. Our engineering desk in Guindy SIDCO will review your details and contact you shortly.
+                      Your enquiry reference ID is <strong className="font-mono">{submittedId}</strong>. Our engineering desk in Erode will review your details and contact you shortly.
                     </p>
                     <button
                       onClick={() => setSubmittedId(null)}
@@ -259,7 +279,7 @@ export default function ContactPage() {
                         <input
                           type="text"
                           {...register('company')}
-                          placeholder="e.g. Chennai Pump Dynamics"
+                          placeholder="e.g. Kongu Tex & Pump Works, Tiruppur / Erode"
                           className="px-space-md py-space-sm rounded-lg bg-surface-container-low border border-outline-variant/60 focus:outline-none focus:border-primary text-on-surface font-body-md text-sm"
                         />
                       </div>
@@ -274,11 +294,11 @@ export default function ContactPage() {
                         {...register('serviceType')}
                         className="px-space-md py-space-sm rounded-lg bg-surface-container-low border border-outline-variant/60 focus:outline-none focus:border-primary text-on-surface font-body-md text-sm"
                       >
-                        <option value="Heavy Lathe Turning">Heavy Lathe Shaft Turning</option>
-                        <option value="Brass Component Fabrication">Brass Component & Sleeve Fabrication</option>
-                        <option value="Prototype Tooling & Retooling">Prototype Tooling & Die Retooling</option>
-                        <option value="High Volume Batch Manufacturing">High Volume Batch Manufacturing</option>
-                        <option value="Other Custom Job">Other Precision Custom Job</option>
+                        <option value="Pump & Motor Shaft Turning">Pump & Motor Shaft Turning</option>
+                        <option value="Textile Machinery Parts & Bushings">Textile Machinery Parts & Bushings</option>
+                        <option value="Precision Brass & Bronze Turning">Precision Brass & Bronze Turning</option>
+                        <option value="Boring, Threading & Heavy Lathe Work">Boring, Threading & Heavy Lathe Work</option>
+                        <option value="Custom Job Work & Machinery Repair">Custom Job Work & Machinery Repair</option>
                       </select>
                     </div>
 

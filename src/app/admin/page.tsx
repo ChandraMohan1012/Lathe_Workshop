@@ -64,8 +64,7 @@ export default async function AdminDashboardPage() {
           <div className="bg-surface-container-lowest p-space-lg rounded-xl border border-outline-variant/50 flex flex-col justify-between">
             <span className="font-label-technical text-xs text-on-surface-variant uppercase">Calibration Standard</span>
             <div className="flex items-baseline justify-between mt-2">
-              <span className="font-display-xl text-2xl font-bold text-on-surface">{settings.standardTolerance}</span>
-              <span className="font-label-technical text-xs text-primary font-semibold">ISO 9001</span>
+              <span className="font-label-technical text-xs text-primary font-semibold">{settings.isoCertified ? 'ISO 9001' : 'Calibrated'}</span>
             </div>
           </div>
         </div>

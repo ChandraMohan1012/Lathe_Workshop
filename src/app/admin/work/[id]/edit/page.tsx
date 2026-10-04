@@ -156,7 +156,7 @@ export default function AdminEditWorkPage({ params }: EditPageProps) {
               >
                 <option value="Precision Turning">Precision Turning</option>
                 <option value="Heavy Duty Turning">Heavy Duty Turning</option>
-                <option value="CNC Milling & Turning">CNC Milling & Turning</option>
+                <option value="Lathe Turning">Lathe Turning</option>
                 <option value="Tooling & Re-tooling">Tooling & Re-tooling</option>
               </select>
             </div>
@@ -210,7 +210,7 @@ export default function AdminEditWorkPage({ params }: EditPageProps) {
               type="text"
               value={clientIndustry}
               onChange={(e) => setClientIndustry(e.target.value)}
-              placeholder="e.g. Aerospace & Defense, Automotive, General Engineering"
+              placeholder="e.g. Textile Machinery, Pump & Motor, Automotive, General Engineering"
               className="px-space-md py-space-sm rounded-lg bg-surface-container-low border border-outline-variant/60 focus:outline-none focus:border-primary text-on-surface font-body-md text-sm"
             />
           </div>

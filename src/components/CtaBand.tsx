@@ -10,12 +10,14 @@ interface CtaBandProps {
 }
 
 export default function CtaBand({
-  title = "Ready for High-Tolerance Lathe Manufacturing?",
-  subtitle = "Send us your CAD drawings or technical blueprints for a detailed engineering evaluation and itemized quotation within 4 hours.",
-  buttonText = "Request Workshop Quotation",
+  title = "Need Precision Lathe Job Work or Component Machining?",
+  subtitle = "Call or WhatsApp your drawing, sample part dimensions, or requirements for an instant quote and quick turnaround.",
+  buttonText = "Call or WhatsApp for a Quote",
   buttonHref = "/contact",
   phone = initialSettings.phone,
 }: CtaBandProps) {
+  const whatsappClean = phone.replace(/[^0-9]/g, '');
+
   return (
     <section className="w-full bg-primary-container text-on-primary-container px-gutter py-space-2xl border-y border-outline-variant/40 relative overflow-hidden">
       {/* Dynamic Background Pattern */}
@@ -31,17 +33,19 @@ export default function CtaBand({
           </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center gap-space-md flex-shrink-0">
-          <Link
-            href={buttonHref}
-            className="inline-flex items-center gap-space-xs px-space-xl py-space-md rounded-full bg-primary text-on-primary font-headline-sm text-sm uppercase tracking-wider hover:bg-primary/90 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+        <div className="flex flex-wrap items-center justify-center gap-space-sm sm:gap-space-md flex-shrink-0">
+          <a
+            href={`https://wa.me/${whatsappClean}?text=Hello%20Lathe%20Pattarai,%20I%20need%20a%20quote%20for%20lathe%20job%20work.`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-space-xl py-space-md rounded-full bg-[#25D366] text-white font-headline-sm text-sm uppercase tracking-wider hover:bg-[#1EBE5D] transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
           >
-            <span>{buttonText}</span>
-            <span className="material-symbols-outlined text-lg">arrow_forward</span>
-          </Link>
+            <span className="material-symbols-outlined text-lg">chat</span>
+            <span>WhatsApp Quote</span>
+          </a>
           <a
             href={`tel:${phone.replace(/\s/g, '')}`}
-            className="inline-flex items-center gap-space-xs px-space-lg py-space-md rounded-full bg-surface-container-lowest text-on-surface font-label-technical text-xs uppercase tracking-wider hover:bg-surface-container transition-colors border border-outline-variant"
+            className="inline-flex items-center gap-space-xs px-space-lg py-space-md rounded-full bg-surface-container-lowest text-on-surface font-label-technical text-xs uppercase tracking-wider hover:bg-surface-container transition-colors border border-outline-variant shadow-sm"
           >
             <span className="material-symbols-outlined text-primary text-lg">call</span>
             <span>Direct Call</span>

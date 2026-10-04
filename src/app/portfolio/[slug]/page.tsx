@@ -167,7 +167,7 @@ export default async function PortfolioDetailPage({ params }: PageProps) {
                   </div>
                   <div className="flex justify-between">
                     <span>Quality Standard:</span>
-                    <span className="font-semibold text-primary">CMM Inspected</span>
+                    <span className="font-semibold text-primary">Micrometer Verified</span>
                   </div>
                 </div>
 

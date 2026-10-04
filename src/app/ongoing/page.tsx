@@ -7,8 +7,8 @@ import StatsBanner from '@/components/StatsBanner';
 import { getLiveJobs, getWorkshopSettings } from '@/lib/supabase';
 
 export const metadata: Metadata = {
-  title: 'Live Workshop Jobs & Bay Status Tracker',
-  description: 'Track real-time active turning bay jobs, queue progress, and estimated completion times across our 16 lathe bays in Guindy SIDCO.',
+  title: 'Live Workshop Jobs & Bay Status Tracker | Erode',
+  description: 'Track real-time active turning bay jobs, queue progress, and estimated completion times across our 16 lathe bays in Erode district.',
 };
 
 export const dynamic = 'force-dynamic';

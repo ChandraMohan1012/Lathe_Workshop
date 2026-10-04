@@ -9,8 +9,8 @@ export default function StatsBanner({ settings = initialSettings }: StatsBannerP
   const statsList = [
     { label: 'Active Turning Bays', value: `${settings.activeBays} / ${settings.totalBays}` },
     { label: 'Precision Tolerance', value: settings.standardTolerance },
-    { label: 'Turnaround Lead', value: '48 Hours' },
-    { label: 'Guindy SIDCO Unit', value: 'Plot 14-B' },
+    { label: 'Turnaround Lead', value: '24-48 Hours' },
+    { label: 'Industrial Belt', value: 'Erode - Tiruppur' },
   ];
 
   return (

@@ -33,7 +33,7 @@ export default function Footer({ settings = initialSettings }: FooterProps) {
               </div>
             </Link>
             <p className="font-body-md text-surface-dim max-w-sm">
-              Dedicated to subtractive precision manufacturing, high-tolerance lathe turning, and custom industrial component tooling in Guindy SIDCO Industrial Estate.
+              Dedicated to precision lathe turning, pump shafts, textile machine parts, and custom industrial job work in Erode district, serving western Tamil Nadu&apos;s manufacturing corridor.
             </p>
           </div>
 
@@ -70,7 +70,7 @@ export default function Footer({ settings = initialSettings }: FooterProps) {
               </li>
               <li>
                 <Link href="/contact" className="hover:text-primary-fixed transition-colors">
-                  Request Quotations
+                  Contact & Quotes
                 </Link>
               </li>
             </ul>
@@ -82,11 +82,11 @@ export default function Footer({ settings = initialSettings }: FooterProps) {
               Capabilities
             </h4>
             <ul className="flex flex-col gap-2 font-label-technical text-xs text-surface-dim uppercase tracking-wider">
-              <li>Heavy Lathe Turning</li>
-              <li>Brass Component Turning</li>
-              <li>Thread Grooving & Sleeves</li>
-              <li>Hardened Steel Retooling</li>
-              <li>Prototype Tooling Runs</li>
+              <li>Pump & Motor Shafts</li>
+              <li>Textile Loom Bushings</li>
+              <li>Brass & Bronze Turning</li>
+              <li>Flanges & Boring Works</li>
+              <li>Custom Machinery Repairs</li>
             </ul>
           </div>
 
@@ -123,7 +123,7 @@ export default function Footer({ settings = initialSettings }: FooterProps) {
         {/* Bottom Bar */}
         <div className="mt-space-2xl pt-space-md border-t border-surface-variant/20 flex flex-col sm:flex-row items-center justify-between gap-space-sm font-label-technical text-[11px] text-surface-dim uppercase tracking-wider">
           <p>© {new Date().getFullYear()} {settings.workshopName}. All rights reserved.</p>
-          <p>Guindy SIDCO Industrial Unit • Precision Machining Excellence</p>
+          <p>Erode Industrial Belt • Precision Lathe Turning & Job Work</p>
         </div>
       </div>
     </footer>

@@ -7,8 +7,8 @@ import StatsBanner from '@/components/StatsBanner';
 import { initialSettings } from '@/lib/mockData';
 
 export const metadata: Metadata = {
-  title: 'Heritage & Machining Facility',
-  description: 'Learn about Lathe Pattarai precision manufacturing heritage, master machinist tradition, and calibrated lathe turning facility in Guindy SIDCO, Chennai.',
+  title: 'Heritage & Machining Facility | Lathe Workshop Erode',
+  description: 'Learn about Lathe Pattarai precision manufacturing heritage, master machinist tradition, and lathe turning facility in Erode district, Tamil Nadu.',
 };
 
 import { getWorkshopSettings } from '@/lib/supabase';
@@ -33,7 +33,7 @@ export default async function AboutPage() {
             </h1>
 
             <p className="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">
-              Rooted in classic machinist discipline and continuous micrometer calibration, Lathe Pattarai delivers subtractive tooling excellence for Chennai industrial manufacturing sectors.
+              Rooted in classic machinist discipline and continuous micrometer calibration, Lathe Pattarai delivers reliable lathe job work for textile, agriculture pump, and engineering sectors across Erode, Tiruppur, and Coimbatore.
             </p>
           </div>
         </section>
@@ -48,13 +48,14 @@ export default async function AboutPage() {
               <div className="relative w-full aspect-[4/5] rounded-2xl overflow-hidden shadow-2xl border-2 border-outline-variant/60">
                 <Image
                   src="/images/master-machinist.png"
-                  alt="Master Indian Machinist & Lathe Workshop Owner"
+                  alt="Master Machinist & Lathe Workshop Founder in Erode"
                   fill
                   className="object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-space-lg">
                   <div className="text-white flex flex-col gap-1">
                     <span className="font-headline-sm text-lg uppercase tracking-tight">Master Craftsmanship</span>
+                    <span className="font-label-technical text-xs text-primary-fixed-dim">Dedicated to Local Industry</span>
                   </div>
                 </div>
               </div>
@@ -63,28 +64,28 @@ export default async function AboutPage() {
             {/* Heritage Narrative */}
             <div className="lg:col-span-7 flex flex-col gap-space-md">
               <h2 className="font-display-xl text-headline-lg uppercase tracking-tight text-on-surface">
-                Uncompromising Subtractive Precision
+                Precision Lathe Turning in the Kongu Industrial Belt
               </h2>
 
               <p className="font-body-lg text-on-surface-variant">
-                Established in the heart of Guindy SIDCO Industrial Estate, Lathe Pattarai was built on a foundational commitment: that mechanical precision is measured not in millimeter estimates, but in verified 0.005mm tolerances.
+                Located in the industrial corridor of Erode, Lathe Pattarai provides reliable lathe job work for textile, pump, motor, and automotive parts for regional industries with prompt turnaround.
               </p>
 
               <p className="font-body-md text-on-surface-variant">
-                From single-piece emergency replacement bushings for heavy hydraulic machinery to batch turned brass components and stepped drive shafts, our workshop combines classic master-lathe feel with rigorous CMM quality auditing.
+                From emergency replacement shafts for agricultural submersible pumps to custom brass bushings for high-speed textile weaving looms, our workshop combines experienced hands-on turning expertise with calibrated micrometer verification down to 0.005mm accuracy.
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-space-md pt-space-md border-t border-outline-variant/40 mt-2">
                 <div className="bg-surface-container-lowest p-space-md rounded-xl border border-outline-variant/40">
-                  <h4 className="font-headline-sm text-base uppercase text-primary">DIN EN ISO Protocol</h4>
+                  <h4 className="font-headline-sm text-base uppercase text-primary">Calibrated Quality Standards</h4>
                   <p className="font-body-md text-xs text-on-surface-variant mt-1">
-                    All machining dimensions undergo multi-point micrometer validation.
+                    All turned diameters and keyways undergo multi-point micrometer and bore gauge inspection.
                   </p>
                 </div>
                 <div className="bg-surface-container-lowest p-space-md rounded-xl border border-outline-variant/40">
-                  <h4 className="font-headline-sm text-base uppercase text-primary">SIDCO Industrial Unit</h4>
+                  <h4 className="font-headline-sm text-base uppercase text-primary">Erode & Tiruppur Service</h4>
                   <p className="font-body-md text-xs text-on-surface-variant mt-1">
-                    Located in Plot 14-B with 16 heavy lathe and CNC bays.
+                    Direct transport dispatch serving Erode, Tiruppur, Coimbatore, Salem, and Namakkal.
                   </p>
                 </div>
               </div>

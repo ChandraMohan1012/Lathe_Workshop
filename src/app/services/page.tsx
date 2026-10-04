@@ -7,8 +7,8 @@ import StatsBanner from '@/components/StatsBanner';
 import { mockFaqs, initialSettings } from '@/lib/mockData';
 
 export const metadata: Metadata = {
-  title: 'Precision Lathe & Subtractive Tooling Services',
-  description: 'Explore Lathe Pattarai specialized machining capabilities: high-precision lathe turning, brass component milling, shaft threading, and emergency prototype retooling.',
+  title: 'Precision Lathe & Turning Services | Erode',
+  description: 'Explore Lathe Pattarai specialized machining capabilities: high-precision lathe turning, brass component turning, pump & motor shafts, and textile machine job work in Erode.',
 };
 
 import { getWorkshopSettings } from '@/lib/supabase';
@@ -21,51 +21,51 @@ export default async function ServicesPage() {
   const settings = await getWorkshopSettings();
   const servicesList = [
     {
-      id: 'heavy-turning',
-      title: 'Heavy Duty & Long Shaft Turning',
+      id: 'pump-motor-turning',
+      title: 'Pump & Motor Shaft Turning',
       icon: 'precision_manufacturing',
-      description: 'Handling heavy alloy steel stock up to 95mm outer diameter and 650mm length. Calibrated steady rests eliminate shaft chatter and taper distortion during deep metal removal.',
+      description: 'Handling heavy alloy steel and stainless steel stock up to 95mm outer diameter and 750mm length. Calibrated steady rests eliminate shaft chatter and taper distortion during deep metal removal.',
       features: [
-        'Stepped drive shafts for marine & industrial pumps',
-        'EN19, EN24, SS316L, and Mild Steel IS2062 capability',
-        'Concentricity runout held under 0.003mm',
-        'Fine surface grinding down to Ra 0.4 µm',
+        'Stepped drive shafts for agricultural borewell & submersible pumps',
+        'EN8, EN19, EN24, SS304, and SS316L stock capability',
+        'Concentricity runout held under 0.005mm',
+        'Precision milled keyways and fine ground bearing journals',
       ],
     },
     {
-      id: 'brass-components',
-      title: 'Precision Brass turned Components & Sleeves',
+      id: 'textile-components',
+      title: 'Textile Machinery Components & Bushings',
       icon: 'settings_input_component',
-      description: 'High-speed precision turning for brassCW614N/C36000 stock. Specialized in internal micro-grooving, fine metric threading, and flanged bushings for hydraulic assemblies.',
+      description: 'High-speed precision turning for brass CW614N and phosphor bronze PB2 stock. Specialized in internal micro-grooving, fine metric threading, and flanged bushings for high-speed weaving and spinning looms.',
       features: [
-        'Internal threads from M12 up to M48 pitch',
-        'Micro-grooved oil seals and retention rings',
-        'Zero heat distortion diamond turning',
-        '100% batch thread gauge verification',
+        'Internal threads from M12 up to M48 fine pitch',
+        'Figure-8 continuous internal lubrication channels',
+        'Loom roller shafts, spindle collars, and guide bushings',
+        '100% batch thread and bore gauge verification',
       ],
     },
     {
-      id: 'prototype-retooling',
-      title: 'Emergency Prototype Retooling & Dies',
+      id: 'boring-job-work',
+      title: 'Boring, Threading & Heavy Lathe Work',
       icon: 'build_circle',
-      description: 'Fast 24-48 hour turnaround for single-piece emergency repair, hardened D2 tool steel punch dies, replacement bushings, and custom lathe tooling fixtures.',
+      description: 'Heavy duty 4-jaw chucking for motor couplings, pulleys, custom tooling dies, and emergency breakdown machinery repair for local factories.',
       features: [
-        'Direct CBN hard turning on HRC 60+ tool steel',
-        'Punch die retooling and radius polishing',
-        'Custom collet fixtures and holding mandrels',
-        'Emergency rapid dispatch to SIDCO industrial clients',
+        'Heavy flange facing and internal diameter boring',
+        'Hard turning on D2 tool steel and case-hardened shafts',
+        'Pulleys, sprockets, and flanged motor couplings',
+        'Emergency fast turnaround for local industrial units',
       ],
     },
     {
       id: 'quality-inspection',
-      title: 'CMM Optical & Micrometer Quality Inspection',
+      title: 'Precision Metrology & Calibrated Quality Audit',
       icon: 'verified',
-      description: 'Every finished job undergoes dimensional audit using calibrated digital micrometers, height gauges, and optical profile projectors under standard DIN EN ISO 14253 protocols.',
+      description: 'Every finished job undergoes dimensional audit using calibrated digital micrometers, bore gauges, and optical measurement to guarantee precision fit before delivery.',
       features: [
-        '±0.005mm dimensional certificate included on request',
-        'Surface roughness Ra measurement logs',
-        'Hardness testing (Rockwell HRC / Brinell)',
-        'Full material test certificate (MTC) traceability',
+        '±0.005mm dimensional verification across all critical diameters',
+        'Fine surface finish measurement and runout checking',
+        'Batch inspection logs for repeat production orders',
+        'Careful dispatch packaging to prevent thread or bearing surface damage',
       ],
     },
   ];
@@ -83,7 +83,7 @@ export default async function ServicesPage() {
             </h1>
 
             <p className="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">
-              Subtractive precision manufacturing, single-piece prototype retooling, and high-tolerance batch component production in Guindy SIDCO. Calibrated down to {settings.standardTolerance} dimensional integrity.
+              Precision lathe turning, pump shafts, textile machinery parts, and custom job work in Erode district. Calibrated down to {settings.standardTolerance} dimensional integrity.
             </p>
           </div>
         </section>

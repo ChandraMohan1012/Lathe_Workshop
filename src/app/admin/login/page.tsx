@@ -62,7 +62,7 @@ function LoginForm() {
           <Image src="/images/logo.png" alt="Lathe Pattarai Logo" fill className="object-contain" />
         </div>
         <span className="font-label-technical text-xs uppercase tracking-widest text-primary font-bold">
-          Guindy SIDCO Workshop Portal
+          Erode Workshop Management Portal
         </span>
         <h1 className="font-headline-sm text-2xl uppercase tracking-tight text-on-surface">
           Admin Authentication

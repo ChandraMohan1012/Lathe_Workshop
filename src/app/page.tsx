@@ -8,7 +8,7 @@ import FaqAccordion from '@/components/FaqAccordion';
 import CtaBand from '@/components/CtaBand';
 import JsonLd from '@/components/JsonLd';
 import { getProjects, getLiveJobs, getWorkshopSettings } from '@/lib/supabase';
-import { mockFaqs } from '@/lib/mockData';
+import { mockFaqs, initialSettings } from '@/lib/mockData';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -36,45 +36,53 @@ export default async function HomePage() {
           <div className="relative max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-space-xl items-center">
             {/* Left Content */}
             <div className="lg:col-span-7 flex flex-col gap-space-md hero-animate-1">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-container text-on-primary-container font-label-technical text-[11px] uppercase tracking-wider w-max border border-primary/20">
+                <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                <span>ஈரோடு & திருப்பூர் தொழிற்துறை லேத் பட்டறை</span>
+              </div>
+
               <h1 className="font-display-xl text-display-xl-mobile sm:text-display-xl text-on-surface uppercase tracking-tight leading-tight">
-                High-Tolerance <br />
-                <span className="text-primary italic font-editorial-accent lowercase">lathe</span> Machining
+                Precision Lathe Turning & <br />
+                <span className="text-primary italic font-editorial-accent lowercase">job work</span> in Erode
               </h1>
 
               <p className="font-body-lg text-body-lg text-on-surface-variant max-w-xl">
-                Single-piece prototype retooling, precision brass turning, and high-tolerance batch manufacturing. Calibrated down to <strong className="text-on-surface font-semibold">{settings.standardTolerance}</strong> dimensional accuracy.
+                Lathe job work for textile machinery, agriculture pumps, electric motor shafts, and custom engineering parts. Calibrated down to <strong className="text-on-surface font-semibold">{settings.standardTolerance}</strong> dimensional accuracy. Serving Erode, Tiruppur, Coimbatore, Salem, and Namakkal.
               </p>
 
               <div className="flex flex-wrap items-center gap-space-md pt-2">
-                <Link
-                  href="/contact"
+                <a
+                  href={`https://wa.me/${(settings.whatsapp || initialSettings.whatsapp).replace(/[^0-9]/g, '')}?text=Hello%2C%20I%20have%20a%20lathe%20job%20work%20requirement%20in%20Erode.`}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="inline-flex items-center gap-space-xs px-space-xl py-space-md rounded-full bg-primary text-on-primary font-headline-sm text-sm uppercase tracking-wider hover:bg-primary/90 transition-all shadow-md"
                 >
-                  <span>Submit Blueprint / CAD</span>
-                  <span className="material-symbols-outlined text-base">arrow_forward</span>
-                </Link>
+                  <span className="material-symbols-outlined text-base">chat</span>
+                  <span>WhatsApp for Instant Quote</span>
+                </a>
 
                 <Link
-                  href="/portfolio"
+                  href="/contact"
                   className="inline-flex items-center gap-space-xs px-space-lg py-space-md rounded-full bg-surface-container text-on-surface font-label-technical text-xs uppercase tracking-wider hover:bg-surface-container-high transition-colors border border-outline-variant"
                 >
-                  <span>View Machine Portfolio</span>
+                  <span className="material-symbols-outlined text-base">upload_file</span>
+                  <span>Submit Blueprint / CAD</span>
                 </Link>
               </div>
 
               {/* Quick specs pills */}
               <div className="pt-space-md grid grid-cols-3 gap-space-sm border-t border-outline-variant/40 mt-4 max-w-lg">
                 <div>
+                  <span className="block font-label-technical text-[10px] uppercase text-on-surface-variant">Regional Hub</span>
+                  <span className="font-headline-sm text-sm text-primary uppercase font-bold">Erode Belt</span>
+                </div>
+                <div>
                   <span className="block font-label-technical text-[10px] uppercase text-on-surface-variant">Calibrated Tolerance</span>
-                  <span className="font-headline-sm text-sm text-primary uppercase font-bold">{settings.standardTolerance}</span>
+                  <span className="font-headline-sm text-sm text-on-surface uppercase font-bold">{settings.standardTolerance}</span>
                 </div>
                 <div>
-                  <span className="block font-label-technical text-[10px] uppercase text-on-surface-variant">Active Bays</span>
-                  <span className="font-headline-sm text-sm text-on-surface uppercase font-bold">{settings.activeBays} Online</span>
-                </div>
-                <div>
-                  <span className="block font-label-technical text-[10px] uppercase text-on-surface-variant">Batch Lead</span>
-                  <span className="font-headline-sm text-sm text-on-surface uppercase font-bold">48 Hours</span>
+                  <span className="block font-label-technical text-[10px] uppercase text-on-surface-variant">Turnaround</span>
+                  <span className="font-headline-sm text-sm text-on-surface uppercase font-bold">24-48 Hours</span>
                 </div>
               </div>
             </div>
@@ -163,10 +171,10 @@ export default async function HomePage() {
                     <span className="material-symbols-outlined text-2xl">precision_manufacturing</span>
                   </div>
                   <h3 className="font-headline-sm text-lg uppercase tracking-tight text-on-surface">
-                    Heavy Lathe Turning
+                    Pump & Motor Shaft Turning
                   </h3>
                   <p className="font-body-md text-sm text-on-surface-variant">
-                    Stepped shaft turning, long marine pump shafts up to 95mm diameter, and heavy alloy steel roughing.
+                    Precision stepped shafts for agricultural borewell pumps, submersible motors, and industrial drives with keyways and fine ground journals.
                   </p>
                 </div>
                 <div className="pt-3 border-t border-outline-variant/30 font-label-technical text-xs text-primary uppercase font-semibold">
@@ -181,14 +189,14 @@ export default async function HomePage() {
                     <span className="material-symbols-outlined text-2xl">settings_input_component</span>
                   </div>
                   <h3 className="font-headline-sm text-lg uppercase tracking-tight text-on-surface">
-                    Brass Components & Threading
+                    Textile Machine Parts & Bushings
                   </h3>
                   <p className="font-body-md text-sm text-on-surface-variant">
-                    Internal micro-threading, turned bushings, flanged sleeves, and high-pressure hydraulic components.
+                    Brass & phosphor bronze bushings, loom rollers, spindle sleeves, internal figure-8 oil grooving, and metric threading for textile mills.
                   </p>
                 </div>
                 <div className="pt-3 border-t border-outline-variant/30 font-label-technical text-xs text-primary uppercase font-semibold">
-                  Micro-grooving & Mirror Finish
+                  Textile & Loom Specialists
                 </div>
               </div>
 
@@ -199,14 +207,14 @@ export default async function HomePage() {
                     <span className="material-symbols-outlined text-2xl">build_circle</span>
                   </div>
                   <h3 className="font-headline-sm text-lg uppercase tracking-tight text-on-surface">
-                    Prototype Tooling & Retooling
+                    Boring, Flanges & Job Work
                   </h3>
                   <p className="font-body-md text-sm text-on-surface-variant">
-                    Single-piece emergency tool steel dies, custom punches, replacement bushings, and hard turning on HRC 60+ steel.
+                    Heavy lathe 4-jaw chucking, motor couplings, pulleys, custom tooling dies, and emergency breakdown machinery repair for local factories.
                   </p>
                 </div>
                 <div className="pt-3 border-t border-outline-variant/30 font-label-technical text-xs text-primary uppercase font-semibold">
-                  Fast 24-48h Prototyping
+                  Fast Turnaround Job Work
                 </div>
               </div>
             </div>

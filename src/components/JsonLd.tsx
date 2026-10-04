@@ -14,24 +14,32 @@ export default function JsonLd({ settings = initialSettings }: JsonLdProps) {
 
   const localBusinessSchema = {
     '@context': 'https://schema.org',
-    '@type': 'LocalBusiness',
+    '@type': ['LocalBusiness', 'ProfessionalService'],
     name: settings.workshopName,
     description: settings.tagline,
     url: siteUrl,
     telephone: settings.phone,
     address: {
       '@type': 'PostalAddress',
-      streetAddress: 'Plot 14-B, SIDCO Industrial Estate',
-      addressLocality: 'Guindy',
+      streetAddress: settings.address || 'Perundurai Road, Erode Industrial Area',
+      addressLocality: 'Erode',
       addressRegion: 'Tamil Nadu',
-      postalCode: '600032',
+      postalCode: '638011',
       addressCountry: 'IN',
     },
     geo: {
       '@type': 'GeoCoordinates',
-      latitude: 13.0067,
-      longitude: 80.2023,
+      latitude: 11.3410,
+      longitude: 77.7172,
     },
+    areaServed: [
+      { '@type': 'City', name: 'Erode' },
+      { '@type': 'City', name: 'Tiruppur' },
+      { '@type': 'City', name: 'Coimbatore' },
+      { '@type': 'City', name: 'Salem' },
+      { '@type': 'City', name: 'Namakkal' },
+      { '@type': 'City', name: 'Karur' },
+    ],
     openingHoursSpecification: [
       {
         '@type': 'OpeningHoursSpecification',
