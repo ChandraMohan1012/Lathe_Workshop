@@ -96,7 +96,7 @@ export default function Navbar({ settings = initialSettings }: NavbarProps) {
             href={`https://wa.me/${(settings.whatsapp || initialSettings.whatsapp).replace(/[^0-9]/g, '')}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden sm:inline-flex items-center gap-space-xs px-space-md py- space-xs py-2 rounded-full bg-surface-container text-on-surface font-label-technical text-[11px] uppercase tracking-wider hover:bg-primary-container hover:text-on-primary-container transition-all border border-outline-variant"
+            className="hidden sm:inline-flex items-center gap-space-xs px-space-md py-2 rounded-full bg-surface-container text-on-surface font-label-technical text-[11px] uppercase tracking-wider hover:bg-primary-container hover:text-on-primary-container transition-all border border-outline-variant"
           >
             <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
             <span>Call / WhatsApp</span>

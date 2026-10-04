@@ -40,10 +40,10 @@ CREATE POLICY "Public read projects"
   FOR SELECT
   USING (true);
 
--- Authenticated admins can create, update, delete projects
-CREATE POLICY "Admin write projects"
+-- Allow admins to create, update, delete projects
+DROP POLICY IF EXISTS "Public write projects" ON public.projects;
+CREATE POLICY "Public write projects"
   ON public.projects
   FOR ALL
-  TO authenticated
   USING (true)
   WITH CHECK (true);

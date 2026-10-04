@@ -198,7 +198,7 @@ export default async function PortfolioDetailPage({ params }: PageProps) {
           </section>
         )}
 
-        <CtaBand />
+        <CtaBand phone={settings.phone} />
       </main>
 
       <Footer settings={settings} />

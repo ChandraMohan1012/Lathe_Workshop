@@ -1,8 +1,11 @@
 import type { Metadata } from 'next';
 import './globals.css';
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://lathepattarai.com';
+const isDemo = process.env.NEXT_PUBLIC_DEMO_MODE === 'true';
+
 export const metadata: Metadata = {
-  metadataBase: new URL('https://lathepattarai.com'),
+  metadataBase: new URL(siteUrl),
   title: {
     default: 'Lathe Pattarai | Precision Machining & Lathe Workshop Guindy',
     template: '%s | Lathe Pattarai',
@@ -23,7 +26,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_IN',
-    url: 'https://lathepattarai.com',
+    url: siteUrl,
     title: 'Lathe Pattarai | Precision Machining Workshop',
     description: 'Subtractive precision manufacturing & high-tolerance batch component production in Guindy SIDCO.',
     siteName: 'Lathe Pattarai Precision Workshop',
@@ -36,10 +39,9 @@ export const metadata: Metadata = {
       },
     ],
   },
-  robots: {
-    index: true,
-    follow: true,
-  },
+  robots: isDemo
+    ? { index: false, follow: false }
+    : { index: true, follow: true },
 };
 
 export default function RootLayout({

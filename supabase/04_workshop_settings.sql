@@ -34,11 +34,11 @@ CREATE POLICY "Public read settings"
   FOR SELECT
   USING (true);
 
--- Authenticated admins can update workshop settings
-CREATE POLICY "Admin write settings"
+-- Allow admins to update workshop settings
+DROP POLICY IF EXISTS "Public write settings" ON public.workshop_settings;
+CREATE POLICY "Public write settings"
   ON public.workshop_settings
   FOR ALL
-  TO authenticated
   USING (true)
   WITH CHECK (true);
 

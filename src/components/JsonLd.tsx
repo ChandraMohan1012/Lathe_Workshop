@@ -1,13 +1,24 @@
+import { WorkshopSettings } from '@/types';
 import { initialSettings, mockFaqs } from '@/lib/mockData';
 
-export default function JsonLd() {
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://lathepattarai.com';
+const isDemo = process.env.NEXT_PUBLIC_DEMO_MODE === 'true';
+
+interface JsonLdProps {
+  settings?: WorkshopSettings;
+}
+
+export default function JsonLd({ settings = initialSettings }: JsonLdProps) {
+  // Don't emit structured data in demo mode — prevents fake phone/address being indexed
+  if (isDemo) return null;
+
   const localBusinessSchema = {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
-    name: initialSettings.workshopName,
-    description: initialSettings.tagline,
-    url: 'https://lathepattarai.com',
-    telephone: initialSettings.phone,
+    name: settings.workshopName,
+    description: settings.tagline,
+    url: siteUrl,
+    telephone: settings.phone,
     address: {
       '@type': 'PostalAddress',
       streetAddress: 'Plot 14-B, SIDCO Industrial Estate',

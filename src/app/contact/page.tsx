@@ -17,7 +17,7 @@ const enquirySchema = z.object({
   phone: z.string().min(10, 'Valid 10-digit mobile number required'),
   company: z.string().optional(),
   serviceType: z.string().min(1, 'Please select a machining service'),
-  message: z.string().min(10, 'Please describe your component specs or tolerances'),
+  message: z.string().min(5, 'Please describe your component specs or tolerances (min 5 chars)'),
   website_hp: z.string().optional(), // Honeypot field for anti-spam
 });
 
@@ -187,10 +187,12 @@ export default function ContactPage() {
                           type="text"
                           {...register('name')}
                           placeholder="e.g. Ramesh Sundaram"
-                          className="px-space-md py-space-sm rounded-lg bg-surface-container-low border border-outline-variant/60 focus:outline-none focus:border-primary text-on-surface font-body-md text-sm"
+                          className={`px-space-md py-space-sm rounded-lg bg-surface-container-low border transition-colors focus:outline-none font-body-md text-sm text-on-surface ${
+                            errors.name ? 'border-error ring-1 ring-error' : 'border-outline-variant/60 focus:border-primary'
+                          }`}
                         />
                         {errors.name && (
-                          <span className="text-error font-label-technical text-[11px]">{errors.name.message}</span>
+                          <span className="text-error font-label-technical text-[11px] font-semibold">{errors.name.message}</span>
                         )}
                       </div>
 
@@ -203,10 +205,12 @@ export default function ContactPage() {
                           type="tel"
                           {...register('phone')}
                           placeholder="+91 98765 43210"
-                          className="px-space-md py-space-sm rounded-lg bg-surface-container-low border border-outline-variant/60 focus:outline-none focus:border-primary text-on-surface font-body-md text-sm"
+                          className={`px-space-md py-space-sm rounded-lg bg-surface-container-low border transition-colors focus:outline-none font-body-md text-sm text-on-surface ${
+                            errors.phone ? 'border-error ring-1 ring-error' : 'border-outline-variant/60 focus:border-primary'
+                          }`}
                         />
                         {errors.phone && (
-                          <span className="text-error font-label-technical text-[11px]">{errors.phone.message}</span>
+                          <span className="text-error font-label-technical text-[11px] font-semibold">{errors.phone.message}</span>
                         )}
                       </div>
                     </div>
@@ -221,10 +225,12 @@ export default function ContactPage() {
                           type="email"
                           {...register('email')}
                           placeholder="ramesh@company.com"
-                          className="px-space-md py-space-sm rounded-lg bg-surface-container-low border border-outline-variant/60 focus:outline-none focus:border-primary text-on-surface font-body-md text-sm"
+                          className={`px-space-md py-space-sm rounded-lg bg-surface-container-low border transition-colors focus:outline-none font-body-md text-sm text-on-surface ${
+                            errors.email ? 'border-error ring-1 ring-error' : 'border-outline-variant/60 focus:border-primary'
+                          }`}
                         />
                         {errors.email && (
-                          <span className="text-error font-label-technical text-[11px]">{errors.email.message}</span>
+                          <span className="text-error font-label-technical text-[11px] font-semibold">{errors.email.message}</span>
                         )}
                       </div>
 
@@ -267,11 +273,13 @@ export default function ContactPage() {
                       <textarea
                         rows={4}
                         {...register('message')}
-                        placeholder="Detail raw material grade (e.g. SS316L, Brass C36000), required tolerances (e.g. ±0.005mm), batch quantity, and drawings..."
-                        className="px-space-md py-space-sm rounded-lg bg-surface-container-low border border-outline-variant/60 focus:outline-none focus:border-primary text-on-surface font-body-md text-sm"
+                        placeholder="Detail raw material grade (e.g. SS316L, Brass C36000), required tolerances (e.g. ±0.005mm), batch quantity, and specifications..."
+                        className={`px-space-md py-space-sm rounded-lg bg-surface-container-low border transition-colors focus:outline-none font-body-md text-sm text-on-surface ${
+                          errors.message ? 'border-error ring-1 ring-error' : 'border-outline-variant/60 focus:border-primary'
+                        }`}
                       ></textarea>
                       {errors.message && (
-                        <span className="text-error font-label-technical text-[11px]">{errors.message.message}</span>
+                        <span className="text-error font-label-technical text-[11px] font-semibold">{errors.message.message}</span>
                       )}
                     </div>
 
@@ -279,16 +287,16 @@ export default function ContactPage() {
                     <button
                       type="submit"
                       disabled={submitting}
-                      className="w-full py-space-md rounded-full bg-primary text-on-primary font-headline-sm text-sm uppercase tracking-wider hover:bg-primary/90 transition-all shadow-md flex items-center justify-center gap-2 mt-2 disabled:opacity-50"
+                      className="w-full py-space-md rounded-full bg-primary text-on-primary font-headline-sm text-sm uppercase tracking-wider hover:bg-primary/90 transition-all shadow-md flex items-center justify-center gap-2 mt-2 disabled:opacity-50 cursor-pointer"
                     >
                       {submitting ? (
                         <>
                           <span className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin"></span>
-                          <span>Processing Evaluation...</span>
+                          <span>Submitting Job Specifications...</span>
                         </>
                       ) : (
                         <>
-                          <span>Submit Technical RFQ</span>
+                          <span>Submit Job Specifications (RFQ)</span>
                           <span className="material-symbols-outlined text-base">send</span>
                         </>
                       )}
@@ -300,7 +308,7 @@ export default function ContactPage() {
           </div>
         </section>
 
-        <CtaBand />
+        <CtaBand phone={settings.phone} />
       </main>
 
       <Footer settings={settings} />

@@ -112,7 +112,7 @@ export default async function AboutPage() {
           </div>
         </section>
 
-        <CtaBand />
+        <CtaBand phone={settings.phone} />
       </main>
 
       <Footer settings={settings} />

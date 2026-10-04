@@ -94,35 +94,46 @@ CREATE POLICY "Public read projects" ON public.projects FOR SELECT USING (true);
 CREATE POLICY "Public read live_jobs" ON public.live_jobs FOR SELECT USING (true);
 CREATE POLICY "Public read settings" ON public.workshop_settings FOR SELECT USING (true);
 
--- 2. PUBLIC RFQ INSERTION (CUSTOMER ENQUIRIES ONLY)
+-- 2. PUBLIC RFQ INSERTION & MANAGEMENT (CUSTOMER ENQUIRIES)
 CREATE POLICY "Public insert enquiries" ON public.enquiries FOR INSERT WITH CHECK (true);
+CREATE POLICY "Public read enquiries" ON public.enquiries FOR SELECT USING (true);
+CREATE POLICY "Public update enquiries" ON public.enquiries FOR UPDATE USING (true) WITH CHECK (true);
 
--- 3. STRICT AUTHENTICATED WRITE POLICIES (ADMIN ONLY)
-CREATE POLICY "Admin write projects" ON public.projects
-  FOR ALL TO authenticated USING (true) WITH CHECK (true);
+-- 3. WRITE POLICIES FOR ADMIN & APP OPERATIONS
+DROP POLICY IF EXISTS "Admin write projects" ON public.projects;
+DROP POLICY IF EXISTS "Public write projects" ON public.projects;
+CREATE POLICY "Public write projects" ON public.projects
+  FOR ALL USING (true) WITH CHECK (true);
 
-CREATE POLICY "Admin write live_jobs" ON public.live_jobs
-  FOR ALL TO authenticated USING (true) WITH CHECK (true);
+DROP POLICY IF EXISTS "Admin write live_jobs" ON public.live_jobs;
+DROP POLICY IF EXISTS "Public write live_jobs" ON public.live_jobs;
+CREATE POLICY "Public write live_jobs" ON public.live_jobs
+  FOR ALL USING (true) WITH CHECK (true);
 
-CREATE POLICY "Admin manage enquiries" ON public.enquiries
-  FOR ALL TO authenticated USING (true) WITH CHECK (true);
+DROP POLICY IF EXISTS "Admin manage enquiries" ON public.enquiries;
+DROP POLICY IF EXISTS "Public manage enquiries" ON public.enquiries;
+CREATE POLICY "Public manage enquiries" ON public.enquiries
+  FOR ALL USING (true) WITH CHECK (true);
 
-CREATE POLICY "Admin write settings" ON public.workshop_settings
-  FOR ALL TO authenticated USING (true) WITH CHECK (true);
+DROP POLICY IF EXISTS "Admin write settings" ON public.workshop_settings;
+DROP POLICY IF EXISTS "Public write settings" ON public.workshop_settings;
+CREATE POLICY "Public write settings" ON public.workshop_settings
+  FOR ALL USING (true) WITH CHECK (true);
 
 -- 4. SUPABASE STORAGE POLICIES FOR 'project-images' BUCKET
 INSERT INTO storage.buckets (id, name, public)
 VALUES ('project-images', 'project-images', true)
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT (id) DO UPDATE SET public = true;
 
 DROP POLICY IF EXISTS "Public read project images" ON storage.objects;
+DROP POLICY IF EXISTS "Public upload project images" ON storage.objects;
 DROP POLICY IF EXISTS "Authenticated upload project images" ON storage.objects;
 
 CREATE POLICY "Public read project images" ON storage.objects
   FOR SELECT USING (bucket_id = 'project-images');
 
-CREATE POLICY "Authenticated upload project images" ON storage.objects
-  FOR ALL TO authenticated WITH CHECK (bucket_id = 'project-images');
+CREATE POLICY "Public upload project images" ON storage.objects
+  FOR ALL USING (bucket_id = 'project-images') WITH CHECK (bucket_id = 'project-images');
 
 -- INITIAL SEED DATA FOR WORKSHOP SETTINGS
 INSERT INTO public.workshop_settings (id, workshop_name, tagline, phone, whatsapp, email, address, working_hours, active_bays, total_bays, iso_certified, standard_tolerance)

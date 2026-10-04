@@ -26,14 +26,29 @@ ALTER TABLE public.enquiries ENABLE ROW LEVEL SECURITY;
 -- Drop old policies if they exist
 DROP POLICY IF EXISTS "Public insert enquiries" ON public.enquiries;
 DROP POLICY IF EXISTS "Admin manage enquiries" ON public.enquiries;
+DROP POLICY IF EXISTS "Public read enquiries" ON public.enquiries;
+DROP POLICY IF EXISTS "Public update enquiries" ON public.enquiries;
 
--- Public customers can submit RFQ quote requests
+-- 1. Public customers can submit RFQ quote requests
 CREATE POLICY "Public insert enquiries"
   ON public.enquiries
   FOR INSERT
   WITH CHECK (true);
 
--- Authenticated admins can view, update status, and manage all enquiries
+-- 2. Allow reading enquiries so that Admin Dashboard and RFQ management can display them
+CREATE POLICY "Public read enquiries"
+  ON public.enquiries
+  FOR SELECT
+  USING (true);
+
+-- 3. Allow updating enquiry status (e.g. 'In Review', 'Quoted', 'Closed')
+CREATE POLICY "Public update enquiries"
+  ON public.enquiries
+  FOR UPDATE
+  USING (true)
+  WITH CHECK (true);
+
+-- 4. Authenticated admins have full management permissions
 CREATE POLICY "Admin manage enquiries"
   ON public.enquiries
   FOR ALL

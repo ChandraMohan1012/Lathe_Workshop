@@ -131,7 +131,7 @@ export default async function ServicesPage() {
 
         <FaqAccordion items={mockFaqs} />
 
-        <CtaBand />
+        <CtaBand phone={settings.phone} />
       </main>
 
       <Footer settings={settings} />

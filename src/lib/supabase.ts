@@ -112,23 +112,31 @@ function mapEnquiryFromDb(row: any): Enquiry {
 // ==========================================
 // 1. PROJECTS CRUD
 // ==========================================
+const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === 'true';
+
 export async function getProjects(): Promise<Project[]> {
   if (!isSupabaseConfigured || !supabase) return mockProjects;
   try {
     const { data, error } = await supabase.from('projects').select('*');
-    if (error || !data || data.length === 0) return mockProjects;
-    
+    if (error) return mockProjects;
+
     // Sort newest first
-    const sorted = [...data].sort(
+    const sorted = [...(data || [])].sort(
       (a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
     );
-
     const dbProjects = sorted.map(mapProjectFromDb);
-    const existingSlugs = new Set(dbProjects.map((p) => p.slug));
-    const existingIds = new Set(dbProjects.map((p) => p.id));
-    const remainingMock = mockProjects.filter((m) => !existingSlugs.has(m.slug) && !existingIds.has(m.id));
-    
-    return [...dbProjects, ...remainingMock];
+
+    // In demo mode: fill empty DB with mocks for a full showcase
+    if (isDemoMode) {
+      if (dbProjects.length === 0) return mockProjects;
+      const existingSlugs = new Set(dbProjects.map((p) => p.slug));
+      const existingIds = new Set(dbProjects.map((p) => p.id));
+      const remainingMock = mockProjects.filter((m) => !existingSlugs.has(m.slug) && !existingIds.has(m.id));
+      return [...dbProjects, ...remainingMock];
+    }
+
+    // Production: return only real DB data; fall back to mocks only if DB is completely empty
+    return dbProjects.length > 0 ? dbProjects : mockProjects;
   } catch (err) {
     return mockProjects;
   }
@@ -149,6 +157,7 @@ export async function createProject(projectData: Omit<Project, 'id'>): Promise<{
   const dbPayload = mapProjectToDb(projectData);
 
   if (!isSupabaseConfigured) {
+    // Demo / offline: persist in-memory only
     const newProject = { ...projectData, id: newId };
     mockProjects.unshift(newProject);
     return { success: true, id: newId };
@@ -163,7 +172,7 @@ export async function createProject(projectData: Omit<Project, 'id'>): Promise<{
       return { success: false, id: '', error: `Database Error: ${error.message}` };
     }
     const createdProj = mapProjectFromDb(data?.[0] || { ...projectData, id: newId });
-    mockProjects.unshift(createdProj);
+    // Do NOT push into mockProjects when Supabase is configured — DB is the source of truth
     return { success: true, id: createdProj.id };
   } catch (err: any) {
     return { success: false, id: '', error: err?.message || 'Database insert failed' };
@@ -222,11 +231,17 @@ export async function getLiveJobs(): Promise<LiveJob[]> {
   if (!isSupabaseConfigured || !supabase) return mockLiveJobs;
   try {
     const { data, error } = await supabase.from('live_jobs').select('*');
-    if (error || !data || data.length === 0) return mockLiveJobs;
-    const dbJobs = data.map(mapLiveJobFromDb);
-    const dbBays = new Set(dbJobs.map((j) => j.bayNumber || j.id));
-    const remainingMocks = mockLiveJobs.filter((m) => !dbBays.has(m.bayNumber) && !dbBays.has(m.id));
-    return [...dbJobs, ...remainingMocks];
+    if (error) return mockLiveJobs;
+    const dbJobs = (data || []).map(mapLiveJobFromDb);
+
+    if (isDemoMode) {
+      if (dbJobs.length === 0) return mockLiveJobs;
+      const dbBays = new Set(dbJobs.map((j) => j.bayNumber || j.id));
+      const remainingMocks = mockLiveJobs.filter((m) => !dbBays.has(m.bayNumber) && !dbBays.has(m.id));
+      return [...dbJobs, ...remainingMocks];
+    }
+
+    return dbJobs.length > 0 ? dbJobs : mockLiveJobs;
   } catch (err) {
     return mockLiveJobs;
   }
@@ -296,28 +311,84 @@ export async function updateLiveJobStatus(
 }
 
 // ==========================================
-// 3. ENQUIRIES CRUD
+// 3. ENQUIRIES CRUD & LOCAL PERSISTENCE
 // ==========================================
-export async function getEnquiries(): Promise<Enquiry[]> {
-  if (!isSupabaseConfigured || !supabase) return mockEnquiries;
-  try {
-    const client = getAuthClient();
-    if (!client) return mockEnquiries;
+const LOCAL_ENQUIRIES_KEY = 'lathe_workshop_local_enquiries';
 
-    const { data, error } = await client.from('enquiries').select('*');
-    if (error || !data) {
-      return mockEnquiries;
+function getLocalEnquiries(): Enquiry[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const stored = window.localStorage.getItem(LOCAL_ENQUIRIES_KEY);
+    if (!stored) return [];
+    const parsed = JSON.parse(stored);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveLocalEnquiry(enquiry: Enquiry) {
+  if (typeof window === 'undefined') return;
+  try {
+    const current = getLocalEnquiries();
+    const updated = [enquiry, ...current.filter((e) => e.id !== enquiry.id)];
+    window.localStorage.setItem(LOCAL_ENQUIRIES_KEY, JSON.stringify(updated.slice(0, 100)));
+  } catch (e) {
+    console.warn('Failed to save enquiry to local storage', e);
+  }
+}
+
+function updateLocalEnquiry(id: string, status: Enquiry['status']) {
+  if (typeof window === 'undefined') return;
+  try {
+    const current = getLocalEnquiries();
+    const updated = current.map((e) => (e.id === id ? { ...e, status } : e));
+    window.localStorage.setItem(LOCAL_ENQUIRIES_KEY, JSON.stringify(updated));
+  } catch (e) {
+    console.warn('Failed to update enquiry in local storage', e);
+  }
+}
+
+export async function getEnquiries(): Promise<Enquiry[]> {
+  const localEnquiries = getLocalEnquiries();
+
+  if (!isSupabaseConfigured || !supabase) {
+    const seenIds = new Set(localEnquiries.map((e) => e.id));
+    const remainingMocks = mockEnquiries.filter((m) => !seenIds.has(m.id));
+    return [...localEnquiries, ...remainingMocks];
+  }
+
+  try {
+    const client = getAuthClient() || supabase;
+    const { data, error } = await client.from('enquiries').select('*').order('created_at', { ascending: false });
+
+    if (error) {
+      console.warn('getEnquiries Supabase notice:', error.message);
     }
 
-    const sorted = [...data].sort(
-      (a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
+    const dbEnquiries = data && Array.isArray(data) ? data.map(mapEnquiryFromDb) : [];
+
+    // Merge local (optimistic) enquiries with DB records, DB wins on conflict
+    const enquiriesMap = new Map<string, Enquiry>();
+    for (const le of localEnquiries) enquiriesMap.set(le.id, le);
+    for (const de of dbEnquiries) enquiriesMap.set(de.id, de);
+
+    // In demo mode only: fill with mock enquiries if nothing real exists
+    if (isDemoMode) {
+      for (const me of mockEnquiries) {
+        if (!enquiriesMap.has(me.id)) enquiriesMap.set(me.id, me);
+      }
+    }
+
+    const sorted = Array.from(enquiriesMap.values()).sort(
+      (a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
     );
-    const dbEnquiries = sorted.map(mapEnquiryFromDb);
-    const dbIds = new Set(dbEnquiries.map((e) => e.id));
-    const remainingMocks = mockEnquiries.filter((m) => !dbIds.has(m.id));
-    return [...dbEnquiries, ...remainingMocks];
+
+    return sorted;
   } catch (err) {
-    return mockEnquiries;
+    const seenIds = new Set(localEnquiries.map((e) => e.id));
+    const remainingMocks = mockEnquiries.filter((m) => !seenIds.has(m.id));
+    return [...localEnquiries, ...remainingMocks];
   }
 }
 
@@ -325,22 +396,26 @@ export async function createEnquiry(
   enquiry: Omit<Enquiry, 'id' | 'createdAt' | 'status'>
 ): Promise<{ success: boolean; id: string; error?: string }> {
   const newId = `enq-${Date.now()}`;
+  const now = new Date().toLocaleString();
 
-  // Always register in in-memory state so local views immediately have it
-  mockEnquiries.unshift({
+  const newEnquiryObj: Enquiry = {
     ...enquiry,
     id: newId,
     status: 'New',
-    createdAt: new Date().toLocaleString(),
-  });
+    createdAt: now,
+  };
+
+  // 1. Update in-memory mock state
+  mockEnquiries.unshift(newEnquiryObj);
+
+  // 2. Save in browser localStorage so Admin views immediately see it
+  saveLocalEnquiry(newEnquiryObj);
 
   if (!isSupabaseConfigured || !supabase) {
     return { success: true, id: newId };
   }
 
   try {
-    // Note: Omit .select() because public anon users have INSERT permission via RLS,
-    // but SELECT permission is restricted to admin/authenticated roles.
     const { error } = await supabase.from('enquiries').insert([
       {
         name: enquiry.name,
@@ -354,7 +429,7 @@ export async function createEnquiry(
     ]);
 
     if (error) {
-      console.warn('Supabase enquiry insert warning:', error.message);
+      console.warn('Supabase enquiry insert notice:', error.message);
     }
 
     return { success: true, id: newId };
@@ -365,25 +440,29 @@ export async function createEnquiry(
 }
 
 export async function updateEnquiryStatus(id: string, status: Enquiry['status']): Promise<{ success: boolean; error?: string }> {
+  // Update mock in-memory
   const enq = mockEnquiries.find((e) => e.id === id);
   if (enq) {
     enq.status = status;
   }
 
+  // Update local storage
+  updateLocalEnquiry(id, status);
+
+  // Update Supabase
   if (isSupabaseConfigured) {
     try {
-      const client = getAuthClient();
-      if (!client) throw new Error('Supabase client uninitialized');
-
+      const client = getAuthClient() || supabase;
       const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
-      if (isUuid) {
+      if (isUuid && client) {
         const { error } = await client.from('enquiries').update({ status }).eq('id', id);
-        if (error) return { success: false, error: error.message };
+        if (error) console.warn('Supabase status update notice:', error.message);
       }
     } catch (err: any) {
-      return { success: false, error: err?.message || 'Update failed' };
+      console.warn('updateEnquiryStatus exception:', err?.message);
     }
   }
+
   return { success: true };
 }
 

@@ -1,10 +1,12 @@
 import Link from 'next/link';
+import { initialSettings } from '@/lib/mockData';
 
 interface CtaBandProps {
   title?: string;
   subtitle?: string;
   buttonText?: string;
   buttonHref?: string;
+  phone?: string;
 }
 
 export default function CtaBand({
@@ -12,6 +14,7 @@ export default function CtaBand({
   subtitle = "Send us your CAD drawings or technical blueprints for a detailed engineering evaluation and itemized quotation within 4 hours.",
   buttonText = "Request Workshop Quotation",
   buttonHref = "/contact",
+  phone = initialSettings.phone,
 }: CtaBandProps) {
   return (
     <section className="w-full bg-primary-container text-on-primary-container px-gutter py-space-2xl border-y border-outline-variant/40 relative overflow-hidden">
@@ -37,7 +40,7 @@ export default function CtaBand({
             <span className="material-symbols-outlined text-lg">arrow_forward</span>
           </Link>
           <a
-            href="tel:+919840012345"
+            href={`tel:${phone.replace(/\s/g, '')}`}
             className="inline-flex items-center gap-space-xs px-space-lg py-space-md rounded-full bg-surface-container-lowest text-on-surface font-label-technical text-xs uppercase tracking-wider hover:bg-surface-container transition-colors border border-outline-variant"
           >
             <span className="material-symbols-outlined text-primary text-lg">call</span>

@@ -97,29 +97,37 @@ export default async function AdminDashboardPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-outline-variant/30">
-                {enquiries.slice(0, 5).map((enq) => (
-                  <tr key={enq.id} className="hover:bg-surface-container-low/50">
-                    <td className="py-3 px-2 font-semibold text-on-surface">{enq.name}</td>
-                    <td className="py-3 px-2 text-on-surface-variant">{enq.serviceType}</td>
-                    <td className="py-3 px-2 text-on-surface-variant text-xs">
-                      <div>{enq.company || 'Individual'}</div>
-                      <div className="text-primary font-mono">{enq.phone}</div>
-                    </td>
-                    <td className="py-3 px-2">
-                      <span className="bg-primary-container text-on-primary-container px-2.5 py-0.5 rounded-full font-label-technical text-[10px] uppercase font-bold">
-                        {enq.status}
-                      </span>
-                    </td>
-                    <td className="py-3 px-2 text-right">
-                      <Link
-                        href="/admin/enquiries"
-                        className="text-xs font-label-technical text-primary uppercase font-semibold hover:underline"
-                      >
-                        Review RFQ
-                      </Link>
+                {enquiries.length > 0 ? (
+                  enquiries.slice(0, 5).map((enq) => (
+                    <tr key={enq.id} className="hover:bg-surface-container-low/50">
+                      <td className="py-3 px-2 font-semibold text-on-surface">{enq.name}</td>
+                      <td className="py-3 px-2 text-on-surface-variant">{enq.serviceType}</td>
+                      <td className="py-3 px-2 text-on-surface-variant text-xs">
+                        <div>{enq.company || 'Individual'}</div>
+                        <div className="text-primary font-mono">{enq.phone}</div>
+                      </td>
+                      <td className="py-3 px-2">
+                        <span className="bg-primary-container text-on-primary-container px-2.5 py-0.5 rounded-full font-label-technical text-[10px] uppercase font-bold">
+                          {enq.status}
+                        </span>
+                      </td>
+                      <td className="py-3 px-2 text-right">
+                        <Link
+                          href="/admin/enquiries"
+                          className="text-xs font-label-technical text-primary uppercase font-semibold hover:underline"
+                        >
+                          Review RFQ
+                        </Link>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={5} className="py-8 text-center text-on-surface-variant font-body-md text-sm">
+                      No customer enquiries received yet. New RFQ submissions will appear here.
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>

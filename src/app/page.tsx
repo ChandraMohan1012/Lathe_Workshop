@@ -18,12 +18,14 @@ export default async function HomePage() {
   const projects = await getProjects();
   const liveJobs = await getLiveJobs();
   const settings = await getWorkshopSettings();
-  const featuredProjects = projects.filter((p) => p.featured || true).slice(0, 3);
+  const featuredProjects = projects.filter((p) => p.featured === true).slice(0, 3);
+  // Fallback: if no featured projects set, show newest 3
+  const displayProjects = featuredProjects.length > 0 ? featuredProjects : projects.slice(0, 3);
   const activeJobs = liveJobs.slice(0, 4);
 
   return (
     <>
-      <JsonLd />
+      <JsonLd settings={settings} />
       <Navbar settings={settings} />
 
       <main className="w-full pt-28 bg-surface flex flex-col flex-grow">
@@ -202,7 +204,7 @@ export default async function HomePage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-space-lg">
-              {featuredProjects.map((project) => (
+              {displayProjects.map((project) => (
                 <WorkCard key={project.id} project={project} />
               ))}
             </div>
@@ -266,7 +268,7 @@ export default async function HomePage() {
         <FaqAccordion items={mockFaqs} />
 
         {/* CTA BAND */}
-        <CtaBand />
+        <CtaBand phone={settings.phone} />
       </main>
 
       <Footer settings={settings} />

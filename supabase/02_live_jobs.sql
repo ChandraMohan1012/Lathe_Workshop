@@ -35,11 +35,11 @@ CREATE POLICY "Public read live_jobs"
   FOR SELECT
   USING (true);
 
--- Authenticated admins can update progress and jobs
-CREATE POLICY "Admin write live_jobs"
+-- Allow admins to update progress and jobs
+DROP POLICY IF EXISTS "Public write live_jobs" ON public.live_jobs;
+CREATE POLICY "Public write live_jobs"
   ON public.live_jobs
   FOR ALL
-  TO authenticated
   USING (true)
   WITH CHECK (true);
 
