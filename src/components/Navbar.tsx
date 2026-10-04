@@ -28,7 +28,7 @@ export default function Navbar({ settings = initialSettings }: NavbarProps) {
     { label: 'Home', href: '/' },
     { label: 'Portfolio', href: '/portfolio' },
     { label: 'Services', href: '/services' },
-    { label: 'Ongoing', href: '/ongoing' },
+    { label: 'Live Bays', href: '/ongoing' },
     { label: 'About', href: '/about' },
     { label: 'Contact', href: '/contact' },
   ];

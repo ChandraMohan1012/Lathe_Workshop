@@ -9,6 +9,7 @@ import Footer from '@/components/Footer';
 import CtaBand from '@/components/CtaBand';
 import { initialSettings } from '@/lib/mockData';
 import { createEnquiry, getWorkshopSettings } from '@/lib/supabase';
+import { uploadDrawingFile } from '@/lib/supabase-storage';
 import { WorkshopSettings } from '@/types';
 
 const enquirySchema = z.object({
@@ -27,6 +28,8 @@ export default function ContactPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submittedId, setSubmittedId] = useState<string | null>(null);
   const [settings, setSettings] = useState<WorkshopSettings>(initialSettings);
+  const [drawingFile, setDrawingFile] = useState<File | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   useEffect(() => {
     getWorkshopSettings().then((res) => {
@@ -56,7 +59,19 @@ export default function ContactPage() {
     }
 
     setSubmitting(true);
+    setUploadError(null);
     try {
+      let drawingUrl: string | undefined = undefined;
+
+      if (drawingFile) {
+        const uploadRes = await uploadDrawingFile(drawingFile);
+        if (uploadRes.success) {
+          drawingUrl = uploadRes.url;
+        } else if (uploadRes.error) {
+          setUploadError(uploadRes.error);
+        }
+      }
+
       const res = await createEnquiry({
         name: data.name,
         email: data.email,
@@ -64,8 +79,10 @@ export default function ContactPage() {
         company: data.company,
         serviceType: data.serviceType,
         message: data.message,
+        drawingUrl,
       });
       setSubmittedId(res.id);
+      setDrawingFile(null);
       reset();
     } catch (err) {
       console.error(err);
@@ -280,6 +297,64 @@ export default function ContactPage() {
                       ></textarea>
                       {errors.message && (
                         <span className="text-error font-label-technical text-[11px] font-semibold">{errors.message.message}</span>
+                      )}
+                    </div>
+
+                    {/* Engineering Blueprint / CAD Drawing File Upload */}
+                    <div className="flex flex-col gap-1.5">
+                      <label className="font-label-technical text-xs uppercase tracking-wider text-on-surface font-semibold flex items-center justify-between">
+                        <span>Attach Blueprint / CAD Drawing (Optional)</span>
+                        <span className="text-[10px] text-on-surface-variant font-normal">PDF, DWG, DXF, STEP, PNG, JPG (Max 15MB)</span>
+                      </label>
+
+                      {drawingFile ? (
+                        <div className="flex items-center justify-between p-3 rounded-xl bg-surface-container border border-primary/40">
+                          <div className="flex items-center gap-2 text-sm font-label-technical text-on-surface truncate">
+                            <span className="material-symbols-outlined text-primary text-xl">description</span>
+                            <span className="truncate font-semibold">{drawingFile.name}</span>
+                            <span className="text-xs text-on-surface-variant font-normal">
+                              ({(drawingFile.size / 1024 / 1024).toFixed(2)} MB)
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setDrawingFile(null)}
+                            className="p-1 rounded-full hover:bg-surface-container-high text-on-surface-variant hover:text-error transition-colors"
+                            title="Remove file"
+                          >
+                            <span className="material-symbols-outlined text-lg">close</span>
+                          </button>
+                        </div>
+                      ) : (
+                        <label className="flex flex-col items-center justify-center p-space-md border-2 border-dashed border-outline-variant/70 hover:border-primary rounded-xl cursor-pointer bg-surface-container-low hover:bg-surface-container transition-all group">
+                          <input
+                            type="file"
+                            accept=".pdf,.png,.jpg,.jpeg,.dwg,.dxf,.step,.stp"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                if (file.size > 15 * 1024 * 1024) {
+                                  setUploadError('File exceeds 15MB limit.');
+                                } else {
+                                  setUploadError(null);
+                                  setDrawingFile(file);
+                                }
+                              }
+                            }}
+                            className="hidden"
+                          />
+                          <div className="flex items-center gap-2 text-on-surface-variant group-hover:text-primary font-label-technical text-xs uppercase tracking-wider">
+                            <span className="material-symbols-outlined text-xl">cloud_upload</span>
+                            <span>Upload CAD Drawing or Technical Blueprint</span>
+                          </div>
+                          <span className="text-[11px] text-on-surface-variant/70 mt-1">
+                            Accepted: PDF, AutoCAD (DWG/DXF), STEP/IGES, High-res Blueprints
+                          </span>
+                        </label>
+                      )}
+
+                      {uploadError && (
+                        <span className="text-error font-label-technical text-[11px] font-semibold">{uploadError}</span>
                       )}
                     </div>
 

@@ -79,20 +79,51 @@ export default async function HomePage() {
               </div>
             </div>
 
-            {/* Right Photo Deck Stack */}
-            <div className="lg:col-span-5 relative min-h-[360px] flex items-center justify-center">
-              <div className="relative w-full max-w-md aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl border-2 border-outline-variant/60 hero-card-master">
-                <Image
-                  src="/images/hero-macro-cnc.png"
-                  alt="Precision CNC Lathe Turning Brass"
-                  fill
-                  priority
-                  className="object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent flex items-end p-space-md">
-                  <div className="text-white font-label-technical text-xs uppercase tracking-wider">
-                    <span className="text-primary-fixed font-bold block">Bay 01 Live Run</span>
-                    <span>Brass CW614N • Threaded Bushing Batch</span>
+            {/* Right Photo Deck Stack with Dynamic Fan Cards */}
+            <div className="lg:col-span-5 relative min-h-[380px] flex items-center justify-center py-6">
+              <div className="relative w-full max-w-md aspect-[4/3]">
+                {/* Fan Card 1 (Back Left Tilt) */}
+                <div className="absolute inset-0 rounded-2xl overflow-hidden shadow-lg border border-outline-variant/50 hero-card-fan-1 bg-surface-container-high pointer-events-none">
+                  <Image
+                    src="/images/brass-components.png"
+                    alt="Turned Brass Components Deck"
+                    fill
+                    sizes="(max-width: 768px) 100vw, 450px"
+                    className="object-cover opacity-75"
+                  />
+                  <div className="absolute inset-0 bg-black/30" />
+                </div>
+
+                {/* Fan Card 2 (Back Right Tilt) */}
+                <div className="absolute inset-0 rounded-2xl overflow-hidden shadow-xl border border-outline-variant/60 hero-card-fan-2 bg-surface-container-high pointer-events-none">
+                  <Image
+                    src="/images/lathe-chuck.png"
+                    alt="Precision 4-Jaw Chucking Deck"
+                    fill
+                    sizes="(max-width: 768px) 100vw, 450px"
+                    className="object-cover opacity-80"
+                  />
+                  <div className="absolute inset-0 bg-black/25" />
+                </div>
+
+                {/* Master Foreground Card (Center Focus) */}
+                <div className="relative z-10 w-full h-full rounded-2xl overflow-hidden shadow-2xl border-2 border-outline-variant/80 hero-card-master">
+                  <Image
+                    src="/images/hero-macro-cnc.png"
+                    alt="Precision CNC Lathe Turning Brass"
+                    fill
+                    priority
+                    sizes="(max-width: 768px) 100vw, 450px"
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-space-md">
+                    <div className="text-white font-label-technical text-xs uppercase tracking-wider">
+                      <span className="text-primary-fixed font-bold flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                        Bay 01 Live Run
+                      </span>
+                      <span className="text-surface-dim">Brass CW614N • Threaded Bushing Batch (±0.005mm)</span>
+                    </div>
                   </div>
                 </div>
               </div>

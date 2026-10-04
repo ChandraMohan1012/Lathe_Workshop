@@ -40,7 +40,16 @@ export const metadata: Metadata = {
     ],
   },
   robots: isDemo
-    ? { index: false, follow: false }
+    ? {
+        index: false,
+        follow: false,
+        nocache: true,
+        googleBot: {
+          index: false,
+          follow: false,
+          noimageindex: true,
+        },
+      }
     : { index: true, follow: true },
 };
 
@@ -52,6 +61,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        {isDemo && <meta name="robots" content="noindex, nofollow, noimageindex" />}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link

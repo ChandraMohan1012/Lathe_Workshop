@@ -28,7 +28,7 @@ export default async function OngoingPage() {
         <section className="w-full bg-surface-container-lowest px-gutter py-space-2xl border-b border-outline-variant/30">
           <div className="max-w-7xl mx-auto flex flex-col gap-space-md">
             <h1 className="font-display-xl text-display-xl-mobile sm:text-display-xl text-on-surface uppercase tracking-tight">
-              Ongoing Workshop <span className="text-primary italic font-editorial-accent">Jobs</span>
+              Live Bay <span className="text-primary italic font-editorial-accent">Tracker</span>
             </h1>
 
             <p className="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">

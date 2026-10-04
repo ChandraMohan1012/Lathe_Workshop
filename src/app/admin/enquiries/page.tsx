@@ -145,11 +145,28 @@ export default function AdminEnquiriesPage() {
                   </div>
                 </div>
 
-                <div className="bg-surface-container-low p-space-md rounded-lg border border-outline-variant/30 text-on-surface font-body-md text-sm">
-                  <span className="block font-label-technical text-[10px] text-on-surface-variant uppercase tracking-wider mb-1">
-                    Component Specifications / Message:
-                  </span>
-                  {enq.message}
+                <div className="bg-surface-container-low p-space-md rounded-lg border border-outline-variant/30 text-on-surface font-body-md text-sm flex flex-col gap-2">
+                  <div>
+                    <span className="block font-label-technical text-[10px] text-on-surface-variant uppercase tracking-wider mb-1">
+                      Component Specifications / Message:
+                    </span>
+                    {enq.message}
+                  </div>
+
+                  {enq.drawingUrl && (
+                    <div className="flex items-center gap-2 pt-2 border-t border-outline-variant/30 font-label-technical text-xs">
+                      <span className="text-on-surface-variant uppercase font-semibold">Attached Blueprint:</span>
+                      <a
+                        href={enq.drawingUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-surface-container border border-primary/30 text-primary font-semibold hover:bg-primary-container transition-colors"
+                      >
+                        <span className="material-symbols-outlined text-sm">attachment</span>
+                        <span>{enq.drawingUrl.split('/').pop() || 'Download Drawing File'}</span>
+                      </a>
+                    </div>
+                  )}
                 </div>
               </div>
             ))

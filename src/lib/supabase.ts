@@ -424,6 +424,7 @@ export async function createEnquiry(
         company: enquiry.company || null,
         service_type: enquiry.serviceType,
         message: enquiry.message,
+        drawing_url: enquiry.drawingUrl || null,
         status: 'New',
       },
     ]);

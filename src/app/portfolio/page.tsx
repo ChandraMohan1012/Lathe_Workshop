@@ -1,9 +1,8 @@
 import { Metadata } from 'next';
-import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import WorkCard from '@/components/WorkCard';
 import CtaBand from '@/components/CtaBand';
+import PortfolioFilterableGrid from '@/components/PortfolioFilterableGrid';
 import { getProjects, getWorkshopSettings } from '@/lib/supabase';
 
 export const metadata: Metadata = {
@@ -37,30 +36,10 @@ export default async function PortfolioPage() {
           </div>
         </section>
 
-        {/* PORTFOLIO GRID */}
+        {/* PORTFOLIO GRID WITH CATEGORY & MATERIAL FILTERS */}
         <section className="w-full px-gutter py-space-2xl bg-surface">
-          <div className="max-w-7xl mx-auto flex flex-col gap-space-xl">
-            {projects.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-space-lg">
-                {projects.map((project) => (
-                  <WorkCard key={project.id} project={project} />
-                ))}
-              </div>
-            ) : (
-              <div className="bg-surface-container-lowest p-space-2xl rounded-2xl border border-outline-variant/40 text-center flex flex-col items-center justify-center gap-space-md py-16">
-                <span className="material-symbols-outlined text-5xl text-outline">precision_manufacturing</span>
-                <h3 className="font-headline-sm text-xl uppercase tracking-tight text-on-surface">No Machined Works Cataloged Yet</h3>
-                <p className="font-body-md text-sm text-on-surface-variant max-w-md">
-                  Our engineering team is documenting recent batch productions. Contact our engineering desk to discuss your custom manufacturing specifications.
-                </p>
-                <Link
-                  href="/contact"
-                  className="mt-2 inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-primary text-on-primary font-headline-sm text-xs uppercase tracking-wider hover:bg-primary/90 transition-all"
-                >
-                  Request Custom Quote
-                </Link>
-              </div>
-            )}
+          <div className="max-w-7xl mx-auto">
+            <PortfolioFilterableGrid initialProjects={projects} />
           </div>
         </section>
 
