@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { LiveJob } from '@/types';
 import { updateLiveJobStatus } from '@/lib/supabase';
+import { useToast } from '@/components/AdminToast';
 
 interface AdminBaysManagerProps {
   initialJobs: LiveJob[];
@@ -15,18 +16,11 @@ const STATUS_OPTIONS: LiveJob['status'][] = [
   'Completed',
 ];
 
-const STATUS_COLORS: Record<LiveJob['status'], { bg: string; text: string; border: string }> = {
-  'In Progress': { bg: 'bg-primary/10', text: 'text-primary', border: 'border-primary/30' },
-  'Setup Phase': { bg: 'bg-amber-500/10', text: 'text-amber-600 dark:text-amber-400', border: 'border-amber-500/30' },
-  'Quality Check': { bg: 'bg-purple-500/10', text: 'text-purple-600 dark:text-purple-400', border: 'border-purple-500/30' },
-  'Completed': { bg: 'bg-emerald-500/10', text: 'text-emerald-600 dark:text-emerald-400', border: 'border-emerald-500/30' },
-};
-
 export default function AdminBaysManager({ initialJobs }: AdminBaysManagerProps) {
   const [jobs, setJobs] = useState<LiveJob[]>(initialJobs);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [savingId, setSavingId] = useState<string | null>(null);
-  const [successId, setSuccessId] = useState<string | null>(null);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const { showToast } = useToast();
 
   const handleProgressChange = (id: string, newProgress: number) => {
     const clamped = Math.max(0, Math.min(100, newProgress));
@@ -41,205 +35,228 @@ export default function AdminBaysManager({ initialJobs }: AdminBaysManagerProps)
     );
   };
 
+  const handleQuickComplete = async (job: LiveJob) => {
+    setSavingId(job.id);
+    const updatedJobs = jobs.map((j) =>
+      j.id === job.id ? { ...j, progress: 100, status: 'Completed' as const } : j
+    );
+    setJobs(updatedJobs);
+
+    try {
+      const res = await updateLiveJobStatus(job.id, 100, 'Completed');
+      if (res.success) {
+        showToast(`${job.bayNumber} marked as completed!`, 'success');
+      } else {
+        showToast(res.error || 'Failed to update job status.', 'error');
+      }
+    } catch {
+      showToast('Error updating job status.', 'error');
+    } finally {
+      setSavingId(null);
+    }
+  };
+
   const handleSave = async (job: LiveJob) => {
     setSavingId(job.id);
-    setErrorMsg(null);
     try {
       const res = await updateLiveJobStatus(job.id, job.progress, job.status);
       if (res.success) {
-        setSuccessId(job.id);
-        setTimeout(() => setSuccessId(null), 3000);
+        showToast(`${job.bayNumber} updated successfully!`, 'success');
+        setEditingId(null);
       } else {
-        setErrorMsg(res.error || 'Failed to update job status.');
+        showToast(res.error || 'Failed to update bay.', 'error');
       }
-    } catch (err: any) {
-      setErrorMsg(err?.message || 'Error saving bay updates.');
+    } catch {
+      showToast('Error updating bay.', 'error');
     } finally {
       setSavingId(null);
     }
   };
 
   return (
-    <div className="bg-surface-container-lowest p-space-lg rounded-2xl border border-outline-variant/60 flex flex-col gap-space-lg shadow-sm">
-      {/* SECTION HEADER */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-outline-variant/30 pb-space-md">
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary text-2xl">precision_manufacturing</span>
-            <h2 className="font-headline-sm text-xl uppercase tracking-tight text-on-surface">
-              Active Turning Bays Operations
-            </h2>
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-label-technical font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-600 border border-emerald-500/30">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-              Live Sync
-            </span>
-          </div>
+    <div id="ongoing-jobs-section" className="flex flex-col gap-4">
+      <div className="flex items-center justify-between border-b border-outline-variant/40 pb-3">
+        <div className="flex flex-col">
+          <h2 className="font-headline-sm text-base sm:text-lg uppercase tracking-tight text-on-surface font-bold">
+            Ongoing Jobs
+          </h2>
           <p className="font-body-md text-xs text-on-surface-variant">
-            Update lathe bay execution progress and operational phases. Changes immediately reflect on the public{' '}
-            <strong className="text-on-surface">/ongoing</strong> tracking board and home page.
+            Track and update progress for active workshop bays.
           </p>
         </div>
-
-        {errorMsg && (
-          <div className="bg-red-500/10 border border-red-500/30 text-red-600 px-3 py-1.5 rounded-lg text-xs font-label-technical">
-            {errorMsg}
-          </div>
-        )}
       </div>
 
-      {/* BAYS CARDS GRID */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-space-lg">
-        {jobs.map((job) => {
-          const isSaving = savingId === job.id;
-          const isSaved = successId === job.id;
-          const statusStyle = STATUS_COLORS[job.status] || STATUS_COLORS['In Progress'];
+      {jobs.length === 0 ? (
+        <div className="py-8 text-center text-on-surface-variant font-body-md text-sm">
+          No ongoing jobs right now. All bays are ready.
+        </div>
+      ) : (
+        <div className="flex flex-col divide-y divide-outline-variant/40 border-y border-outline-variant/40">
+          {jobs.map((job) => {
+            const isEditing = editingId === job.id;
+            const isSaving = savingId === job.id;
+            const isCompleted = job.status === 'Completed' || job.progress === 100;
 
-          return (
-            <div
-              key={job.id}
-              className={`p-space-lg bg-surface-container-low rounded-xl border transition-all flex flex-col gap-space-md shadow-xs ${
-                isSaved ? 'border-emerald-500/70 ring-1 ring-emerald-500/30' : 'border-outline-variant/50 hover:border-outline-variant'
-              }`}
-            >
-              {/* Card Header: Bay & Ref */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="px-3 py-1 rounded-md bg-primary text-on-primary font-label-technical text-xs font-bold uppercase tracking-wider">
-                    {job.bayNumber}
-                  </span>
-                  <span className="font-label-technical text-[11px] text-on-surface-variant font-mono bg-surface-container px-2 py-0.5 rounded">
-                    {job.partReference}
-                  </span>
-                </div>
+            return (
+              <div
+                key={job.id}
+                className="py-4 sm:py-5 flex flex-col gap-3 transition-colors hover:bg-surface-container-low/40 px-2 sm:px-3"
+              >
+                {/* Top Row: Bay badge, Job Title, Material, Status Tag */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="flex items-start sm:items-center gap-3">
+                    <span className="font-label-technical text-xs font-bold px-2 py-0.5 bg-surface-container-high text-on-surface rounded-[3px] border border-outline-variant/60 flex-shrink-0">
+                      {job.bayNumber}
+                    </span>
+                    <div className="flex flex-col">
+                      <span className="font-headline-sm text-sm sm:text-base uppercase tracking-tight text-on-surface font-bold">
+                        {job.jobTitle}
+                      </span>
+                      <span className="font-label-technical text-xs text-on-surface-variant uppercase mt-0.5">
+                        {job.material} • {job.tolerance}
+                      </span>
+                    </div>
+                  </div>
 
-                <div className={`px-2.5 py-1 rounded-full text-[11px] font-label-technical font-bold uppercase tracking-wider border ${statusStyle.bg} ${statusStyle.text} ${statusStyle.border}`}>
-                  {job.status}
-                </div>
-              </div>
-
-              {/* Title & Metadata */}
-              <div className="flex flex-col gap-1">
-                <h3 className="font-headline-sm text-base uppercase text-on-surface font-semibold">
-                  {job.jobTitle}
-                </h3>
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-label-technical text-on-surface-variant">
-                  <span>Material: <strong className="text-on-surface">{job.material}</strong></span>
-                  <span>•</span>
-                  <span>Tolerance: <strong className="text-primary font-mono">{job.tolerance}</strong></span>
-                  <span>•</span>
-                  <span>Tech: <strong className="text-on-surface">{job.technician}</strong></span>
-                </div>
-              </div>
-
-              {/* Interactive Status Dropdown */}
-              <div className="flex flex-col gap-1.5 pt-2 border-t border-outline-variant/30">
-                <label className="font-label-technical text-[11px] uppercase tracking-wider text-on-surface-variant font-semibold">
-                  Operational Phase
-                </label>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
-                  {STATUS_OPTIONS.map((st) => {
-                    const isSelected = job.status === st;
-                    return (
-                      <button
-                        key={st}
-                        type="button"
-                        onClick={() => handleStatusChange(job.id, st)}
-                        className={`px-2 py-1.5 rounded-lg text-[11px] font-label-technical uppercase font-bold tracking-tight transition-all border ${
-                          isSelected
-                            ? 'bg-primary text-on-primary border-primary shadow-xs'
-                            : 'bg-surface-container text-on-surface-variant border-outline-variant/40 hover:bg-surface-container-high'
+                  {/* Status indicator tag */}
+                  <div className="flex items-center gap-3 self-start sm:self-auto">
+                    <span
+                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[3px] text-xs font-label-technical uppercase tracking-wider font-semibold border ${
+                        isCompleted
+                          ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                          : 'bg-surface-container text-on-surface border-outline-variant/60'
+                      }`}
+                    >
+                      <span
+                        className={`w-1.5 h-1.5 rounded-full ${
+                          isCompleted ? 'bg-emerald-600' : 'bg-primary'
                         }`}
-                      >
-                        {st}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
+                      />
+                      <span>{job.status}</span>
+                    </span>
 
-              {/* Interactive Progress Slider & Presets */}
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center justify-between text-xs font-label-technical">
-                  <span className="text-on-surface-variant uppercase font-semibold">
-                    Machining Progress
-                  </span>
-                  <div className="flex items-center gap-1.5">
-                    <span className="font-mono text-base font-bold text-primary">
+                    <span className="font-mono text-sm font-bold text-primary">
                       {job.progress}%
                     </span>
                   </div>
                 </div>
 
-                {/* Range Slider */}
-                <div className="flex items-center gap-3">
-                  <input
-                    type="range"
-                    min="0"
-                    max="100"
-                    step="1"
-                    value={job.progress}
-                    onChange={(e) => handleProgressChange(job.id, Number(e.target.value))}
-                    className="w-full h-2 bg-surface-container-highest rounded-lg appearance-none cursor-pointer accent-primary"
+                {/* Middle: Thin Progress Line */}
+                <div className="w-full bg-outline-variant/30 h-1.5 overflow-hidden">
+                  <div
+                    className="bg-[#6a5d34] h-full transition-all duration-300"
+                    style={{ width: `${job.progress}%` }}
                   />
                 </div>
 
-                {/* Progress Quick Presets */}
-                <div className="flex items-center justify-between gap-1 pt-1">
-                  {[25, 50, 75, 100].map((preset) => (
+                {/* Bottom Row / Actions */}
+                <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
+                  <span className="font-label-technical text-xs text-on-surface-variant uppercase">
+                    Machinist: <strong className="text-on-surface font-semibold">{job.technician}</strong> • ETA: {job.estimatedCompletion}
+                  </span>
+
+                  <div className="flex items-center gap-2">
+                    {!isCompleted && (
+                      <button
+                        type="button"
+                        disabled={isSaving}
+                        onClick={() => handleQuickComplete(job)}
+                        className="px-3 py-1.5 rounded-[4px] bg-emerald-700 hover:bg-emerald-800 text-white font-label-technical text-xs uppercase tracking-wider font-bold transition-colors disabled:opacity-50 min-h-[36px]"
+                      >
+                        {isSaving ? 'Saving...' : 'Mark completed'}
+                      </button>
+                    )}
+
                     <button
-                      key={preset}
                       type="button"
-                      onClick={() => handleProgressChange(job.id, preset)}
-                      className={`flex-1 py-1 text-[10px] font-label-technical uppercase font-semibold rounded border transition-colors ${
-                        job.progress === preset
-                          ? 'bg-primary/20 text-primary border-primary/50 font-bold'
-                          : 'bg-surface-container-lowest text-on-surface-variant border-outline-variant/40 hover:bg-surface-container'
-                      }`}
+                      onClick={() => setEditingId(isEditing ? null : job.id)}
+                      className="px-3 py-1.5 rounded-[4px] border border-outline-variant text-on-surface hover:bg-surface-container font-label-technical text-xs uppercase tracking-wider font-semibold transition-colors min-h-[36px]"
                     >
-                      {preset}%
+                      {isEditing ? 'Close' : 'Update progress'}
                     </button>
-                  ))}
+                  </div>
                 </div>
-              </div>
 
-              {/* Action Save Button */}
-              <div className="pt-2 border-t border-outline-variant/30 flex items-center justify-between gap-3">
-                <span className="font-label-technical text-[10px] text-on-surface-variant uppercase">
-                  Est. Completion: <strong className="text-on-surface">{job.estimatedCompletion}</strong>
-                </span>
+                {/* Expanded Inline Editor when "Update progress" is clicked */}
+                {isEditing && (
+                  <div className="mt-2 p-4 bg-surface-container-low border border-outline-variant/60 rounded-[4px] flex flex-col gap-4 animate-in fade-in duration-150">
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center justify-between text-xs font-label-technical uppercase">
+                        <span className="font-semibold text-on-surface">Adjust Progress</span>
+                        <span className="font-mono font-bold text-primary text-sm">{job.progress}%</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={job.progress}
+                        onChange={(e) => handleProgressChange(job.id, Number(e.target.value))}
+                        className="w-full h-2 accent-[#6a5d34] cursor-pointer"
+                      />
+                      <div className="grid grid-cols-4 gap-2 pt-1">
+                        {[25, 50, 75, 100].map((preset) => (
+                          <button
+                            key={preset}
+                            type="button"
+                            onClick={() => handleProgressChange(job.id, preset)}
+                            className={`py-1.5 text-xs font-label-technical font-semibold rounded-[3px] border transition-colors ${
+                              job.progress === preset
+                                ? 'bg-[#6a5d34] text-white border-[#6a5d34]'
+                                : 'bg-surface text-on-surface border-outline-variant hover:bg-surface-container'
+                            }`}
+                          >
+                            {preset}%
+                          </button>
+                        ))}
+                      </div>
+                    </div>
 
-                <button
-                  type="button"
-                  onClick={() => handleSave(job)}
-                  disabled={isSaving}
-                  className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full font-label-technical text-xs uppercase font-bold tracking-wider transition-all shadow-xs ${
-                    isSaved
-                      ? 'bg-emerald-600 text-white'
-                      : 'bg-primary text-on-primary hover:bg-primary/90 disabled:opacity-50'
-                  }`}
-                >
-                  {isSaving ? (
-                    <>
-                      <span className="w-3.5 h-3.5 rounded-full border-2 border-white border-t-transparent animate-spin"></span>
-                      <span>Syncing...</span>
-                    </>
-                  ) : isSaved ? (
-                    <>
-                      <span className="material-symbols-outlined text-sm">check</span>
-                      <span>Synced ✓</span>
-                    </>
-                  ) : (
-                    <>
-                      <span className="material-symbols-outlined text-sm">sync</span>
-                      <span>Update Bay</span>
-                    </>
-                  )}
-                </button>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="font-label-technical text-xs uppercase tracking-wider text-on-surface font-semibold">
+                        Operational Status
+                      </label>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        {STATUS_OPTIONS.map((st) => (
+                          <button
+                            key={st}
+                            type="button"
+                            onClick={() => handleStatusChange(job.id, st)}
+                            className={`py-2 px-2 text-xs font-label-technical uppercase tracking-wider font-semibold rounded-[3px] border transition-colors ${
+                              job.status === st
+                                ? 'bg-[#6a5d34] text-white border-[#6a5d34]'
+                                : 'bg-surface text-on-surface-variant border-outline-variant hover:bg-surface-container'
+                            }`}
+                          >
+                            {st}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-end gap-2 pt-2 border-t border-outline-variant/30">
+                      <button
+                        type="button"
+                        onClick={() => setEditingId(null)}
+                        className="px-4 py-2 rounded-[4px] border border-outline-variant text-on-surface font-label-technical text-xs uppercase tracking-wider font-semibold hover:bg-surface-container"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        disabled={isSaving}
+                        onClick={() => handleSave(job)}
+                        className="px-5 py-2 rounded-[4px] bg-[#6a5d34] text-white font-label-technical text-xs uppercase tracking-wider font-bold hover:bg-[#7e6f3e] disabled:opacity-50"
+                      >
+                        {isSaving ? 'Saving...' : 'Save Updates'}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
