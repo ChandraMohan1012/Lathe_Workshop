@@ -7,35 +7,34 @@ export default function NotFound() {
     <>
       <Navbar />
 
-      <main className="w-full min-h-[75vh] pt-28 bg-surface flex items-center justify-center px-gutter py-space-2xl">
-        <div className="max-w-2xl mx-auto bg-surface-container-lowest p-space-2xl rounded-2xl border border-outline-variant/60 shadow-xl flex flex-col items-center text-center gap-space-md">
-          {/* Industrial Icon */}
-          <div className="w-20 h-20 rounded-full bg-error-container text-on-error-container flex items-center justify-center">
-            <span className="material-symbols-outlined text-4xl">error_med</span>
-          </div>
+      <main className="w-full min-h-[70vh] pt-24 sm:pt-28 bg-surface flex items-center justify-center px-4 sm:px-6 lg:px-8 py-16">
+        <div className="max-w-xl mx-auto flex flex-col items-center text-center gap-6">
+          <span className="font-display-xl text-6xl sm:text-7xl font-bold text-primary font-mono">
+            404
+          </span>
 
-          <h1 className="font-display-xl text-display-xl-mobile sm:text-display-xl uppercase tracking-tight text-on-surface">
-            Tool Axis <span className="text-primary italic font-editorial-accent">Not Found</span>
+          <h1 className="font-display-xl text-2xl sm:text-4xl uppercase tracking-tight text-on-surface font-bold">
+            Page Not Found
           </h1>
 
-          <p className="font-body-lg text-body-md text-on-surface-variant max-w-md">
-            The requested drawing spec or page path does not exist on our workshop server. The tool axis may have drifted off-coordinate.
+          <p className="font-body-md text-sm sm:text-base text-on-surface-variant max-w-md leading-relaxed">
+            The page or component drawing you requested cannot be found. Return to the workshop home or explore our lathe services.
           </p>
 
-          <div className="flex flex-wrap items-center justify-center gap-space-md pt-space-md border-t border-outline-variant/30 w-full mt-2">
+          <div className="flex flex-wrap items-center justify-center gap-3 pt-4 border-t border-outline-variant/40 w-full">
             <Link
               href="/"
-              className="inline-flex items-center gap-space-xs px-space-xl py-space-md rounded-full bg-primary text-on-primary font-headline-sm text-xs uppercase tracking-wider hover:bg-primary/90 transition-all shadow-md"
+              className="inline-flex items-center gap-2 px-5 py-3 rounded-[4px] bg-[#6a5d34] text-white font-label-technical text-xs uppercase tracking-wider font-bold hover:bg-[#7e6f3e] transition-colors"
             >
-              <span className="material-symbols-outlined text-base">home</span>
-              <span>Return to Main Floor</span>
+              <span className="material-symbols-outlined text-sm">home</span>
+              <span>Back to Home</span>
             </Link>
 
             <Link
               href="/services"
-              className="inline-flex items-center gap-space-xs px-space-lg py-space-md rounded-full bg-surface-container text-on-surface font-label-technical text-xs uppercase tracking-wider hover:bg-surface-container-high transition-colors border border-outline-variant"
+              className="inline-flex items-center gap-2 px-5 py-3 rounded-[4px] bg-surface-container text-on-surface border border-outline-variant font-label-technical text-xs uppercase tracking-wider font-bold hover:bg-surface-container-high transition-colors"
             >
-              <span>Explore Services</span>
+              <span>View Services</span>
             </Link>
           </div>
         </div>

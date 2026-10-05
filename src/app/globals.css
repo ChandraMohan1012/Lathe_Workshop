@@ -53,14 +53,14 @@ nav a[data-path] {
 nav a[data-path]:not([aria-current="page"])::after {
   content: '';
   position: absolute;
-  left: 0.5rem;
-  right: 0.5rem;
-  bottom: 2px;
+  left: 0.25rem;
+  right: 0.25rem;
+  bottom: 0px;
   height: 1.5px;
   background-color: #cab988;
   transform: scaleX(0);
   transform-origin: left;
-  transition: transform 0.35s var(--ease-precision);
+  transition: transform 0.3s var(--ease-precision);
 }
 nav a[data-path]:not([aria-current="page"]):hover::after {
   transform: scaleX(1);
@@ -68,72 +68,48 @@ nav a[data-path]:not([aria-current="page"]):hover::after {
 
 /* Header scrolled elevation */
 header.nav-scrolled {
-  box-shadow: 0 4px 20px -2px rgba(24, 28, 34, 0.08);
-  border-bottom: 1px solid rgba(205, 198, 183, 0.45);
+  box-shadow: 0 2px 12px -2px rgba(24, 28, 34, 0.08);
+  border-bottom: 1px solid rgba(205, 198, 183, 0.6);
 }
 
-/* Animations */
-@keyframes heroRevealFadeUp {
-  0% {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* Marquee animation for industrial logos / sectors */
+@keyframes marqueeScroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 }
 
-.hero-animate-1 {
-  animation: heroRevealFadeUp 0.8s var(--ease-precision) 0.1s both;
-}
-.hero-animate-2 {
-  animation: heroRevealFadeUp 0.85s var(--ease-precision) 0.18s both;
-}
-.hero-animate-3 {
-  animation: heroRevealFadeUp 0.85s var(--ease-precision) 0.26s both;
-}
-.hero-animate-4 {
-  animation: heroRevealFadeUp 0.9s var(--ease-precision) 0.34s both;
-}
-.hero-animate-5 {
-  animation: heroRevealFadeUp 0.95s var(--ease-precision) 0.42s both;
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marqueeScroll 28s linear infinite;
 }
 
-@keyframes cardFan1 {
-  0% { transform: rotate(0deg) scale(0.92) translate(0, 0); opacity: 0; }
-  100% { transform: rotate(-6deg) scale(0.95) translate(1rem, 0); opacity: 1; }
-}
-@keyframes cardFan2 {
-  0% { transform: rotate(0deg) scale(0.92) translate(0, 0); opacity: 0; }
-  100% { transform: rotate(3deg) scale(0.95) translate(-0.75rem, 0.75rem); opacity: 1; }
-}
-@keyframes cardMaster {
-  0% { transform: translateY(24px) scale(0.97); opacity: 0; }
-  100% { transform: translateY(0) scale(1); opacity: 1; }
+.animate-marquee:hover {
+  animation-play-state: paused;
 }
 
-.hero-card-fan-1 {
-  animation: cardFan1 1s var(--ease-precision) 0.2s both;
-  will-change: transform, opacity;
-}
-.hero-card-fan-2 {
-  animation: cardFan2 1.05s var(--ease-precision) 0.3s both;
-  will-change: transform, opacity;
-}
-.hero-card-master {
-  animation: cardMaster 0.95s var(--ease-precision) 0.15s both;
-  will-change: transform, opacity;
+/* Editorial line draw transition */
+.line-draw {
+  transition: width 0.8s var(--ease-precision);
 }
 
-/* Interactive card zoom and lift */
-.interactive-card {
-  transition: transform 0.45s var(--ease-precision), box-shadow 0.45s var(--ease-precision);
-  will-change: transform;
+/* Scroll reveal utility */
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s var(--ease-precision), transform 0.6s var(--ease-precision);
 }
-.interactive-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 28px -6px rgba(24, 28, 34, 0.1);
+.reveal-on-scroll.is-revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Interactive row hover styling */
+.editorial-row {
+  transition: background-color 0.25s ease, border-color 0.25s ease, padding 0.25s ease;
+}
+.editorial-row:hover {
+  background-color: rgba(202, 185, 136, 0.06);
 }
 
 /* Accessibility: prefers-reduced-motion support */
@@ -146,4 +122,9 @@ header.nav-scrolled {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+  .animate-marquee {
+    animation: none !important;
+    overflow-x: auto;
+  }
 }
+

@@ -2,203 +2,186 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Project } from '@/types';
-import WorkCard from './WorkCard';
+import { initialSettings } from '@/lib/mockData';
 
 interface PortfolioFilterableGridProps {
   initialProjects: Project[];
+  phone?: string;
+  whatsapp?: string;
 }
 
-export default function PortfolioFilterableGrid({ initialProjects }: PortfolioFilterableGridProps) {
-  const [selectedCategory, setSelectedCategory] = useState<string>('All');
-  const [selectedMaterial, setSelectedMaterial] = useState<string>('All');
+const TABS = ['All', 'Turning', 'Threading', 'Boring', 'Batch work'];
+
+// Varying aspect ratios for masonry feel
+const ASPECT_RATIOS = [
+  'aspect-[4/3]',
+  'aspect-[3/4]',
+  'aspect-[16/10]',
+  'aspect-square',
+  'aspect-[4/5]',
+  'aspect-[16/9]',
+];
+
+export default function PortfolioFilterableGrid({
+  initialProjects,
+  phone = initialSettings.phone,
+  whatsapp = initialSettings.whatsapp,
+}: PortfolioFilterableGridProps) {
+  const [selectedTab, setSelectedTab] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
-  // Extract unique categories and materials dynamically from data
-  const categories = useMemo(() => {
-    const set = new Set<string>();
-    initialProjects.forEach((p) => {
-      if (p.category) set.add(p.category);
-    });
-    return ['All', ...Array.from(set)];
-  }, [initialProjects]);
+  const cleanPhone = phone.replace(/[^0-9+]/g, '');
+  const cleanWhatsapp = (whatsapp || phone).replace(/[^0-9]/g, '');
 
-  const materials = useMemo(() => {
-    const set = new Set<string>();
-    initialProjects.forEach((p) => {
-      if (p.material) set.add(p.material);
-    });
-    return ['All', ...Array.from(set)];
-  }, [initialProjects]);
-
-  // Filter projects based on category, material, and search
   const filteredProjects = useMemo(() => {
     return initialProjects.filter((p) => {
-      const matchCategory = selectedCategory === 'All' || p.category === selectedCategory;
-      const matchMaterial = selectedMaterial === 'All' || p.material === selectedMaterial;
-      const query = searchQuery.toLowerCase().trim();
-      const matchSearch =
-        !query ||
-        p.title.toLowerCase().includes(query) ||
-        p.description.toLowerCase().includes(query) ||
-        p.material.toLowerCase().includes(query) ||
-        p.category.toLowerCase().includes(query) ||
-        p.tolerance.toLowerCase().includes(query) ||
-        (p.clientIndustry && p.clientIndustry.toLowerCase().includes(query));
+      // Tab matching logic
+      let matchesTab = true;
+      if (selectedTab !== 'All') {
+        const textToSearch = `${p.category || ''} ${p.title} ${p.description || ''} ${p.material || ''}`.toLowerCase();
+        if (selectedTab === 'Turning') {
+          matchesTab = textToSearch.includes('turning') || textToSearch.includes('shaft');
+        } else if (selectedTab === 'Threading') {
+          matchesTab = textToSearch.includes('thread') || textToSearch.includes('bushing');
+        } else if (selectedTab === 'Boring') {
+          matchesTab = textToSearch.includes('boring') || textToSearch.includes('flange') || textToSearch.includes('coupling');
+        } else if (selectedTab === 'Batch work') {
+          matchesTab = textToSearch.includes('batch') || textToSearch.includes('repair') || textToSearch.includes('die') || textToSearch.includes('tooling');
+        } else {
+          matchesTab = textToSearch.includes(selectedTab.toLowerCase());
+        }
+      }
 
-      return matchCategory && matchMaterial && matchSearch;
+      const q = searchQuery.toLowerCase().trim();
+      const matchesSearch =
+        !q ||
+        p.title.toLowerCase().includes(q) ||
+        p.material.toLowerCase().includes(q) ||
+        p.tolerance.toLowerCase().includes(q);
+
+      return matchesTab && matchesSearch;
     });
-  }, [initialProjects, selectedCategory, selectedMaterial, searchQuery]);
-
-  const resetFilters = () => {
-    setSelectedCategory('All');
-    setSelectedMaterial('All');
-    setSearchQuery('');
-  };
-
-  const hasActiveFilters = selectedCategory !== 'All' || selectedMaterial !== 'All' || searchQuery.length > 0;
-
-  if (initialProjects.length === 0) {
-    return (
-      <div className="bg-surface-container-lowest p-space-2xl rounded-2xl border border-outline-variant/40 text-center flex flex-col items-center justify-center gap-space-md py-16">
-        <span className="material-symbols-outlined text-5xl text-outline">precision_manufacturing</span>
-        <h3 className="font-headline-sm text-xl uppercase tracking-tight text-on-surface">No Machined Works Cataloged Yet</h3>
-        <p className="font-body-md text-sm text-on-surface-variant max-w-md">
-          Our engineering team is documenting recent batch productions. Contact our engineering desk to discuss your custom manufacturing specifications.
-        </p>
-        <Link
-          href="/contact"
-          className="mt-2 inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-primary text-on-primary font-headline-sm text-xs uppercase tracking-wider hover:bg-primary/90 transition-all"
-        >
-          Request Custom Quote
-        </Link>
-      </div>
-    );
-  }
+  }, [initialProjects, selectedTab, searchQuery]);
 
   return (
-    <div className="flex flex-col gap-space-xl">
-      {/* FILTER & SEARCH BAR */}
-      <div className="bg-surface-container-lowest p-space-md sm:p-space-lg rounded-2xl border border-outline-variant/50 shadow-xs flex flex-col gap-space-md">
-        {/* Top Controls: Search + Material dropdown */}
-        <div className="flex flex-col sm:flex-row gap-space-sm items-stretch sm:items-center justify-between">
-          {/* Search Input */}
-          <div className="relative flex-grow max-w-lg">
-            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg">
-              search
-            </span>
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search components by title, tolerance, or material..."
-              className="w-full pl-10 pr-4 py-2 rounded-xl bg-surface-container-low border border-outline-variant/60 focus:border-primary focus:outline-none font-body-md text-sm text-on-surface"
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface"
-              >
-                <span className="material-symbols-outlined text-sm">close</span>
-              </button>
-            )}
-          </div>
-
-          {/* Material Filter Dropdown */}
-          <div className="flex items-center gap-2">
-            <label className="font-label-technical text-xs uppercase tracking-wider text-on-surface-variant whitespace-nowrap hidden sm:inline">
-              Material:
-            </label>
-            <select
-              value={selectedMaterial}
-              onChange={(e) => setSelectedMaterial(e.target.value)}
-              className="px-3 py-2 rounded-xl bg-surface-container-low border border-outline-variant/60 focus:border-primary focus:outline-none font-label-technical text-xs uppercase tracking-wider text-on-surface"
-            >
-              {materials.map((mat) => (
-                <option key={mat} value={mat}>
-                  {mat === 'All' ? 'All Materials' : mat}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        {/* Category Pills */}
-        <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-outline-variant/30">
-          <span className="font-label-technical text-[11px] uppercase tracking-wider text-on-surface-variant mr-2">
-            Category:
-          </span>
-          {categories.map((cat) => {
-            const active = selectedCategory === cat;
-            const count = cat === 'All' ? initialProjects.length : initialProjects.filter((p) => p.category === cat).length;
+    <div className="flex flex-col gap-10">
+      {/* Filters: Plain text tabs with underline indicator + Search bar */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-outline-variant/40 pb-4">
+        {/* Tabs */}
+        <div className="flex items-center gap-6 sm:gap-8 overflow-x-auto no-scrollbar">
+          {TABS.map((tab) => {
+            const active = selectedTab === tab;
             return (
               <button
-                key={cat}
+                key={tab}
                 type="button"
-                onClick={() => setSelectedCategory(cat)}
-                className={`px-3 py-1 rounded-full font-label-technical text-[11px] uppercase tracking-wider transition-all flex items-center gap-1.5 ${
-                  active
-                    ? 'bg-primary text-on-primary font-bold shadow-xs'
-                    : 'bg-surface-container-low text-on-surface-variant hover:bg-surface-container hover:text-on-surface border border-outline-variant/50'
+                onClick={() => setSelectedTab(tab)}
+                className={`relative pb-3 font-label-technical text-xs sm:text-sm uppercase tracking-wider transition-colors whitespace-nowrap focus:outline-none ${
+                  active ? 'text-primary font-bold' : 'text-on-surface-variant hover:text-on-surface'
                 }`}
               >
-                <span>{cat}</span>
-                <span className={`text-[9px] px-1.5 py-0.2 rounded-full ${active ? 'bg-white/20 text-white' : 'bg-surface-container text-on-surface-variant'}`}>
-                  {count}
-                </span>
+                <span>{tab}</span>
+                {active && (
+                  <span className="absolute left-0 right-0 bottom-0 h-0.5 bg-[#cab988] transition-all duration-300" />
+                )}
               </button>
             );
           })}
+        </div>
 
-          {hasActiveFilters && (
+        {/* Search Input */}
+        <div className="relative max-w-xs w-full">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search material or spec..."
+            className="w-full bg-transparent border-b border-outline-variant/60 focus:border-primary px-1 py-1.5 font-body-md text-xs sm:text-sm text-on-surface focus:outline-none placeholder:text-on-surface-variant/50"
+          />
+          {searchQuery && (
             <button
-              type="button"
-              onClick={resetFilters}
-              className="ml-auto text-xs font-label-technical text-primary hover:underline uppercase tracking-wider flex items-center gap-1"
+              onClick={() => setSearchQuery('')}
+              className="absolute right-1 top-1/2 -translate-y-1/2 text-on-surface-variant text-xs hover:text-on-surface"
             >
-              <span className="material-symbols-outlined text-sm">restart_alt</span>
-              Reset Filters
+              Clear
             </button>
           )}
         </div>
       </div>
 
-      {/* RESULT STATUS BAR */}
-      <div className="flex items-center justify-between text-xs font-label-technical text-on-surface-variant uppercase tracking-wider px-1">
-        <span>
-          Showing <strong className="text-on-surface font-semibold">{filteredProjects.length}</strong> of{' '}
-          {initialProjects.length} machined works
-        </span>
-        {hasActiveFilters && (
-          <span className="text-primary font-semibold">
-            Active Filter: {selectedCategory !== 'All' ? selectedCategory : ''}{' '}
-            {selectedMaterial !== 'All' ? `• ${selectedMaterial}` : ''}
-          </span>
-        )}
-      </div>
-
-      {/* PORTFOLIO GRID OR NO RESULTS */}
+      {/* Masonry Gallery with Varied Image Heights */}
       {filteredProjects.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-space-lg">
-          {filteredProjects.map((project) => (
-            <WorkCard key={project.id} project={project} />
-          ))}
+        <div className="columns-1 sm:columns-2 lg:columns-3 gap-8 space-y-8">
+          {filteredProjects.map((project, idx) => {
+            const aspectClass = ASPECT_RATIOS[idx % ASPECT_RATIOS.length];
+            return (
+              <div
+                key={project.id}
+                className="break-inside-avoid flex flex-col group transition-opacity duration-300"
+              >
+                <Link
+                  href={`/portfolio/${project.slug}`}
+                  className="block relative w-full overflow-hidden rounded-[6px] border border-outline-variant/50 bg-surface-container"
+                >
+                  <div className={`relative w-full ${aspectClass} overflow-hidden`}>
+                    <Image
+                      src={project.image}
+                      alt={project.title}
+                      fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      className="object-cover group-hover:scale-[1.02] transition-transform duration-500"
+                    />
+                  </div>
+                </Link>
+
+                {/* Small Caption Below */}
+                <div className="pt-3 pb-1 flex flex-col gap-1">
+                  <div className="flex items-center justify-between text-[11px] font-label-technical uppercase tracking-wider text-on-surface-variant">
+                    <span className="text-primary font-semibold">{project.material}</span>
+                    <span>{project.tolerance}</span>
+                  </div>
+
+                  <Link href={`/portfolio/${project.slug}`}>
+                    <h3 className="font-headline-sm text-base uppercase tracking-tight text-on-surface font-bold group-hover:text-primary transition-colors leading-snug">
+                      {project.title}
+                    </h3>
+                  </Link>
+                </div>
+              </div>
+            );
+          })}
         </div>
       ) : (
-        <div className="bg-surface-container-lowest p-space-2xl rounded-2xl border border-outline-variant/40 text-center flex flex-col items-center justify-center gap-space-md py-12">
-          <span className="material-symbols-outlined text-4xl text-outline">filter_list_off</span>
-          <h3 className="font-headline-sm text-lg uppercase tracking-tight text-on-surface">No Machined Works Match Filter</h3>
-          <p className="font-body-md text-sm text-on-surface-variant max-w-md">
-            No projects found matching category &quot;{selectedCategory}&quot; or material &quot;{selectedMaterial}&quot;. Try resetting your filters.
+        /* Empty State with Call & WhatsApp */
+        <div className="py-20 flex flex-col items-center justify-center text-center gap-4 max-w-md mx-auto">
+          <span className="font-label-technical text-xs uppercase tracking-widest text-primary font-bold">
+            No Works Matching Filter
+          </span>
+          <h3 className="font-display-xl text-2xl uppercase tracking-tight text-on-surface font-bold">
+            Looking for a specific component?
+          </h3>
+          <p className="font-body-md text-sm text-on-surface-variant leading-relaxed">
+            Our workshop handles regular custom turning, threading, and boring jobs that may not be cataloged here. Send your drawing or call directly.
           </p>
-          <button
-            type="button"
-            onClick={resetFilters}
-            className="mt-2 inline-flex items-center gap-2 px-5 py-2 rounded-full bg-primary text-on-primary font-headline-sm text-xs uppercase tracking-wider hover:bg-primary/90 transition-all"
-          >
-            Clear All Filters
-          </button>
+          <div className="flex flex-wrap items-center gap-3 pt-2">
+            <a
+              href={`tel:${cleanPhone}`}
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-[4px] bg-[#6a5d34] text-white font-label-technical text-xs uppercase tracking-wider font-bold hover:bg-[#7e6f3e] transition-colors"
+            >
+              <span className="material-symbols-outlined text-sm">call</span>
+              <span>Call Workshop</span>
+            </a>
+            <a
+              href={`https://wa.me/${cleanWhatsapp}?text=Hello%20Lathe%20Pattarai,%20I%20have%20a%20component%20job%20requirement.`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-[4px] bg-surface-container text-on-surface font-label-technical text-xs uppercase tracking-wider font-bold hover:bg-surface-container-high transition-colors border border-outline-variant"
+            >
+              <span>WhatsApp Drawing</span>
+            </a>
+          </div>
         </div>
       )}
     </div>

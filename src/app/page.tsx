@@ -1,14 +1,25 @@
-import Link from 'next/link';
-import Image from 'next/image';
+import { Metadata } from 'next';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import StatsBanner from '@/components/StatsBanner';
-import WorkCard from '@/components/WorkCard';
 import FaqAccordion from '@/components/FaqAccordion';
 import CtaBand from '@/components/CtaBand';
 import JsonLd from '@/components/JsonLd';
+import HomeHeroSlider from '@/components/HomeHeroSlider';
+import HomeServicesInteractive from '@/components/HomeServicesInteractive';
+import HomeFeaturedWorks from '@/components/HomeFeaturedWorks';
+import HomeLiveWorkRows from '@/components/HomeLiveWorkRows';
+import IndustrialMarquee from '@/components/IndustrialMarquee';
 import { getProjects, getLiveJobs, getWorkshopSettings } from '@/lib/supabase';
-import { mockFaqs, initialSettings } from '@/lib/mockData';
+import { mockFaqs } from '@/lib/mockData';
+
+export const metadata: Metadata = {
+  title: 'Lathe Workshop in Erode | Precision Turning & Job Work',
+  description: 'Lathe Pattarai is a lathe workshop in Perundurai Road, Erode, Tamil Nadu, doing turning, threading, boring and repair work for textile and pump industries.',
+  alternates: {
+    canonical: '/',
+  },
+};
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -18,8 +29,8 @@ export default async function HomePage() {
   const projects = await getProjects();
   const liveJobs = await getLiveJobs();
   const settings = await getWorkshopSettings();
+
   const featuredProjects = projects.filter((p) => p.featured === true).slice(0, 3);
-  // Fallback: if no featured projects set, show newest 3
   const displayProjects = featuredProjects.length > 0 ? featuredProjects : projects.slice(0, 3);
   const activeJobs = liveJobs.slice(0, 4);
 
@@ -28,286 +39,38 @@ export default async function HomePage() {
       <JsonLd settings={settings} />
       <Navbar settings={settings} />
 
-      <main className="w-full pt-28 bg-surface flex flex-col flex-grow">
-        {/* HERO SECTION */}
-        <section className="relative w-full bg-surface-container-lowest px-gutter py-space-2xl overflow-hidden border-b border-outline-variant/30">
-          <div className="absolute inset-0 opacity-[0.04] pointer-events-none bg-[radial-gradient(#181c22_1px,transparent_1px)] [background-size:24px_24px]"></div>
+      <main className="w-full pt-16 sm:pt-20 bg-surface flex flex-col flex-grow">
+        {/* 1. HERO SECTION: Full-width workshop photo slider, dark overlay, large headline */}
+        <HomeHeroSlider
+          phone={settings.phone}
+          whatsapp={settings.whatsapp}
+        />
 
-          <div className="relative max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-space-xl items-center">
-            {/* Left Content */}
-            <div className="lg:col-span-7 flex flex-col gap-space-md hero-animate-1">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-container text-on-primary-container font-label-technical text-[11px] uppercase tracking-wider w-max border border-primary/20">
-                <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                <span>ஈரோடு & திருப்பூர் தொழிற்துறை லேத் பட்டறை</span>
-              </div>
+        {/* 2. STATS SECTION: Inline line of real numbers separated by dividers */}
+        <StatsBanner settings={settings} />
 
-              <h1 className="font-display-xl text-display-xl-mobile sm:text-display-xl text-on-surface uppercase tracking-tight leading-tight">
-                Precision Lathe Turning & <br />
-                <span className="text-primary italic font-editorial-accent lowercase">job work</span> in Erode
-              </h1>
+        {/* 3. SERVICES SECTION: Numbered rows with desktop hover photo reveal */}
+        <HomeServicesInteractive />
 
-              <p className="font-body-lg text-body-lg text-on-surface-variant max-w-xl">
-                Lathe job work for textile machinery, agriculture pumps, electric motor shafts, and custom engineering parts. Calibrated down to <strong className="text-on-surface font-semibold">{settings.standardTolerance}</strong> dimensional accuracy. Serving Erode, Tiruppur, Coimbatore, Salem, and Namakkal.
-              </p>
+        {/* 4. FEATURED WORKS: Editorial layout (1 large image + 2 smaller images beside it) */}
+        <HomeFeaturedWorks projects={displayProjects} />
 
-              <div className="flex flex-wrap items-center gap-space-md pt-2">
-                <a
-                  href={`https://wa.me/${(settings.whatsapp || initialSettings.whatsapp).replace(/[^0-9]/g, '')}?text=Hello%2C%20I%20have%20a%20lathe%20job%20work%20requirement%20in%20Erode.`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-space-xs px-space-xl py-space-md rounded-full bg-primary text-on-primary font-headline-sm text-sm uppercase tracking-wider hover:bg-primary/90 transition-all shadow-md"
-                >
-                  <span className="material-symbols-outlined text-base">chat</span>
-                  <span>WhatsApp for Instant Quote</span>
-                </a>
+        {/* 5. LIVE WORK (ONGOING): Compact list rows with thin progress lines */}
+        <HomeLiveWorkRows jobs={activeJobs} />
 
-                <Link
-                  href="/contact"
-                  className="inline-flex items-center gap-space-xs px-space-lg py-space-md rounded-full bg-surface-container text-on-surface font-label-technical text-xs uppercase tracking-wider hover:bg-surface-container-high transition-colors border border-outline-variant"
-                >
-                  <span className="material-symbols-outlined text-base">upload_file</span>
-                  <span>Submit Blueprint / CAD</span>
-                </Link>
-              </div>
+        {/* 6. INDUSTRIES MARQUEE: Auto-scrolling industrial sectors */}
+        <IndustrialMarquee />
 
-              {/* Quick specs pills */}
-              <div className="pt-space-md grid grid-cols-3 gap-space-sm border-t border-outline-variant/40 mt-4 max-w-lg">
-                <div>
-                  <span className="block font-label-technical text-[10px] uppercase text-on-surface-variant">Regional Hub</span>
-                  <span className="font-headline-sm text-sm text-primary uppercase font-bold">Erode Belt</span>
-                </div>
-                <div>
-                  <span className="block font-label-technical text-[10px] uppercase text-on-surface-variant">Calibrated Tolerance</span>
-                  <span className="font-headline-sm text-sm text-on-surface uppercase font-bold">{settings.standardTolerance}</span>
-                </div>
-                <div>
-                  <span className="block font-label-technical text-[10px] uppercase text-on-surface-variant">Turnaround</span>
-                  <span className="font-headline-sm text-sm text-on-surface uppercase font-bold">24-48 Hours</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Photo Deck Stack with Dynamic Fan Cards */}
-            <div className="lg:col-span-5 relative min-h-[380px] flex items-center justify-center py-6">
-              <div className="relative w-full max-w-md aspect-[4/3]">
-                {/* Fan Card 1 (Back Left Tilt) */}
-                <div className="absolute inset-0 rounded-2xl overflow-hidden shadow-lg border border-outline-variant/50 hero-card-fan-1 bg-surface-container-high pointer-events-none">
-                  <Image
-                    src="/images/brass-components.png"
-                    alt="Turned Brass Components Deck"
-                    fill
-                    sizes="(max-width: 768px) 100vw, 450px"
-                    className="object-cover opacity-75"
-                  />
-                  <div className="absolute inset-0 bg-black/30" />
-                </div>
-
-                {/* Fan Card 2 (Back Right Tilt) */}
-                <div className="absolute inset-0 rounded-2xl overflow-hidden shadow-xl border border-outline-variant/60 hero-card-fan-2 bg-surface-container-high pointer-events-none">
-                  <Image
-                    src="/images/lathe-chuck.png"
-                    alt="Precision 4-Jaw Chucking Deck"
-                    fill
-                    sizes="(max-width: 768px) 100vw, 450px"
-                    className="object-cover opacity-80"
-                  />
-                  <div className="absolute inset-0 bg-black/25" />
-                </div>
-
-                {/* Master Foreground Card (Center Focus) */}
-                <div className="relative z-10 w-full h-full rounded-2xl overflow-hidden shadow-2xl border-2 border-outline-variant/80 hero-card-master">
-                  <Image
-                    src="/images/hero-macro-cnc.png"
-                    alt="Precision CNC Lathe Turning Brass"
-                    fill
-                    priority
-                    sizes="(max-width: 768px) 100vw, 450px"
-                    className="object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-space-md">
-                    <div className="text-white font-label-technical text-xs uppercase tracking-wider">
-                      <span className="text-primary-fixed font-bold flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                        Bay 01 Live Run
-                      </span>
-                      <span className="text-surface-dim">Brass CW614N • Threaded Bushing Batch (±0.005mm)</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* TELEMETRY STATS BANNER */}
-        <StatsBanner />
-
-        {/* SERVICES OVERVIEW GRID */}
-        <section className="w-full px-gutter py-space-2xl bg-surface">
-          <div className="max-w-7xl mx-auto flex flex-col gap-space-xl">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-space-md border-b border-outline-variant/40 pb-space-md">
-              <div className="flex flex-col gap-1">
-                <span className="font-label-technical text-xs uppercase tracking-widest text-primary font-semibold">
-                  Workshop Capabilities
-                </span>
-                <h2 className="font-display-xl text-headline-lg uppercase tracking-tight text-on-surface">
-                  Precision Lathe Services
-                </h2>
-              </div>
-              <Link
-                href="/services"
-                className="font-label-technical text-xs text-primary uppercase font-semibold tracking-wider hover:underline inline-flex items-center gap-1"
-              >
-                Explore All Services
-                <span className="material-symbols-outlined text-sm">arrow_forward</span>
-              </Link>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-space-lg">
-              {/* Service Card 1 */}
-              <div className="bg-surface-container-lowest p-space-lg rounded-2xl border border-outline-variant/50 flex flex-col justify-between gap-4 interactive-card">
-                <div className="flex flex-col gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-primary-container/40 text-on-primary-container flex items-center justify-center">
-                    <span className="material-symbols-outlined text-2xl">precision_manufacturing</span>
-                  </div>
-                  <h3 className="font-headline-sm text-lg uppercase tracking-tight text-on-surface">
-                    Pump & Motor Shaft Turning
-                  </h3>
-                  <p className="font-body-md text-sm text-on-surface-variant">
-                    Precision stepped shafts for agricultural borewell pumps, submersible motors, and industrial drives with keyways and fine ground journals.
-                  </p>
-                </div>
-                <div className="pt-3 border-t border-outline-variant/30 font-label-technical text-xs text-primary uppercase font-semibold">
-                  Tolerances to ±0.005mm
-                </div>
-              </div>
-
-              {/* Service Card 2 */}
-              <div className="bg-surface-container-lowest p-space-lg rounded-2xl border border-outline-variant/50 flex flex-col justify-between gap-4 interactive-card">
-                <div className="flex flex-col gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-primary-container/40 text-on-primary-container flex items-center justify-center">
-                    <span className="material-symbols-outlined text-2xl">settings_input_component</span>
-                  </div>
-                  <h3 className="font-headline-sm text-lg uppercase tracking-tight text-on-surface">
-                    Textile Machine Parts & Bushings
-                  </h3>
-                  <p className="font-body-md text-sm text-on-surface-variant">
-                    Brass & phosphor bronze bushings, loom rollers, spindle sleeves, internal figure-8 oil grooving, and metric threading for textile mills.
-                  </p>
-                </div>
-                <div className="pt-3 border-t border-outline-variant/30 font-label-technical text-xs text-primary uppercase font-semibold">
-                  Textile & Loom Specialists
-                </div>
-              </div>
-
-              {/* Service Card 3 */}
-              <div className="bg-surface-container-lowest p-space-lg rounded-2xl border border-outline-variant/50 flex flex-col justify-between gap-4 interactive-card">
-                <div className="flex flex-col gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-primary-container/40 text-on-primary-container flex items-center justify-center">
-                    <span className="material-symbols-outlined text-2xl">build_circle</span>
-                  </div>
-                  <h3 className="font-headline-sm text-lg uppercase tracking-tight text-on-surface">
-                    Boring, Flanges & Job Work
-                  </h3>
-                  <p className="font-body-md text-sm text-on-surface-variant">
-                    Heavy lathe 4-jaw chucking, motor couplings, pulleys, custom tooling dies, and emergency breakdown machinery repair for local factories.
-                  </p>
-                </div>
-                <div className="pt-3 border-t border-outline-variant/30 font-label-technical text-xs text-primary uppercase font-semibold">
-                  Fast Turnaround Job Work
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* FEATURED PORTFOLIO SECTION */}
-        <section className="w-full bg-surface-container-low px-gutter py-space-2xl border-t border-outline-variant/30">
-          <div className="max-w-7xl mx-auto flex flex-col gap-space-xl">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
-              <div className="flex flex-col gap-1">
-                <span className="font-label-technical text-xs uppercase tracking-widest text-primary font-semibold">
-                  Machined Components Showcase
-                </span>
-                <h2 className="font-display-xl text-headline-lg uppercase tracking-tight text-on-surface">
-                  Featured Portfolio Works
-                </h2>
-              </div>
-              <Link
-                href="/portfolio"
-                className="font-label-technical text-xs text-primary uppercase font-semibold tracking-wider hover:underline inline-flex items-center gap-1"
-              >
-                View Full Showcase Catalog
-                <span className="material-symbols-outlined text-sm">arrow_forward</span>
-              </Link>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-space-lg">
-              {displayProjects.map((project) => (
-                <WorkCard key={project.id} project={project} />
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* LIVE WORKSHOP BAY TEASER */}
-        <section className="w-full bg-surface px-gutter py-space-2xl border-t border-outline-variant/30">
-          <div className="max-w-7xl mx-auto flex flex-col gap-space-xl">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-space-md border-b border-outline-variant/40 pb-space-md">
-              <div>
-                <h2 className="font-display-xl text-headline-lg uppercase tracking-tight text-on-surface mt-1">
-                  Active Turning Bay Jobs
-                </h2>
-              </div>
-              <Link
-                href="/ongoing"
-                className="font-label-technical text-xs text-primary uppercase font-semibold tracking-wider hover:underline inline-flex items-center gap-1"
-              >
-                Open Full Bay Tracker
-                <span className="material-symbols-outlined text-sm">arrow_forward</span>
-              </Link>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-space-md">
-              {activeJobs.map((job) => (
-                <div
-                  key={job.id}
-                  className="bg-surface-container-lowest p-space-md rounded-xl border border-outline-variant/50 flex flex-col justify-between gap-3"
-                >
-                  <div className="flex items-center justify-between font-label-technical text-xs uppercase tracking-wider">
-                    <span className="bg-primary-container text-on-primary-container px-2.5 py-0.5 rounded-full font-bold">
-                      {job.bayNumber}
-                    </span>
-                    <span className="text-on-surface-variant">{job.partReference}</span>
-                  </div>
-
-                  <h4 className="font-headline-sm text-base uppercase text-on-surface">
-                    {job.jobTitle}
-                  </h4>
-
-                  <div className="flex items-center justify-between text-xs text-on-surface-variant font-label-technical">
-                    <span>{job.material} • {job.tolerance}</span>
-                    <span className="font-semibold text-primary">{job.status}</span>
-                  </div>
-
-                  {/* Progress Bar */}
-                  <div className="w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
-                    <div
-                      className="bg-primary h-full transition-all duration-500"
-                      style={{ width: `${job.progress}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* FAQ ACCORDION */}
+        {/* 7. FAQ ACCORDION: Simple accordion with thin line dividers */}
         <FaqAccordion items={mockFaqs} />
 
-        {/* CTA BAND */}
-        <CtaBand phone={settings.phone} />
+        {/* 8. FINAL CTA: Large typographic statement with Call and WhatsApp buttons */}
+        <CtaBand
+          title="Have a part to make?"
+          subtitle="Lathe Pattarai is a lathe workshop in Perundurai Road, Erode, Tamil Nadu, doing turning, threading, boring and repair work. Call our engineering desk or send your component drawing on WhatsApp."
+          phone={settings.phone}
+          whatsapp={settings.whatsapp}
+        />
       </main>
 
       <Footer settings={settings} />

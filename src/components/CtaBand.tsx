@@ -1,54 +1,52 @@
-import Link from 'next/link';
 import { initialSettings } from '@/lib/mockData';
 
 interface CtaBandProps {
   title?: string;
   subtitle?: string;
-  buttonText?: string;
-  buttonHref?: string;
   phone?: string;
+  whatsapp?: string;
 }
 
 export default function CtaBand({
-  title = "Need Precision Lathe Job Work or Component Machining?",
-  subtitle = "Call or WhatsApp your drawing, sample part dimensions, or requirements for an instant quote and quick turnaround.",
-  buttonText = "Call or WhatsApp for a Quote",
-  buttonHref = "/contact",
+  title = "Have a part to make?",
+  subtitle = "Lathe Pattarai is a lathe workshop in Perundurai Road, Erode, Tamil Nadu, doing turning, threading, boring and repair work. Send your drawing or call our workshop directly.",
   phone = initialSettings.phone,
+  whatsapp = initialSettings.whatsapp,
 }: CtaBandProps) {
-  const whatsappClean = phone.replace(/[^0-9]/g, '');
+  const cleanPhone = phone.replace(/[^0-9+]/g, '');
+  const cleanWhatsapp = (whatsapp || phone).replace(/[^0-9]/g, '');
 
   return (
-    <section className="w-full bg-primary-container text-on-primary-container px-gutter py-space-2xl border-y border-outline-variant/40 relative overflow-hidden">
-      {/* Dynamic Background Pattern */}
-      <div className="absolute inset-0 opacity-[0.06] bg-[radial-gradient(#181c22_1px,transparent_1px)] [background-size:20px_20px] pointer-events-none"></div>
-
-      <div className="relative max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-space-lg">
-        <div className="flex flex-col gap-space-xs max-w-3xl text-center lg:text-left">
-          <h2 className="font-display-xl text-display-xl-mobile sm:text-headline-lg uppercase tracking-tight text-on-primary-container mt-2">
+    <section className="w-full bg-[#181c22] text-white px-4 sm:px-6 lg:px-8 py-16 sm:py-24 border-t border-[#2d3037]">
+      <div className="max-w-7xl mx-auto flex flex-col lg:flex-row lg:items-end justify-between gap-8 lg:gap-12">
+        <div className="flex flex-col gap-3 max-w-3xl">
+          <span className="font-label-technical text-xs uppercase tracking-widest text-[#cab988] font-bold">
+            Direct Job-Work Desk
+          </span>
+          <h2 className="font-display-xl text-3xl sm:text-4xl lg:text-5xl uppercase tracking-tight text-white leading-tight font-bold">
             {title}
           </h2>
-          <p className="font-body-lg text-body-lg text-on-primary-container/90">
+          <p className="font-body-md text-base sm:text-lg text-[#c5c7d0] mt-1 max-w-2xl leading-relaxed">
             {subtitle}
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center justify-center gap-space-sm sm:gap-space-md flex-shrink-0">
+        <div className="flex flex-wrap items-center gap-3 sm:gap-4 flex-shrink-0">
           <a
-            href={`https://wa.me/${whatsappClean}?text=Hello%20Lathe%20Pattarai,%20I%20need%20a%20quote%20for%20lathe%20job%20work.`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-space-xl py-space-md rounded-full bg-[#25D366] text-white font-headline-sm text-sm uppercase tracking-wider hover:bg-[#1EBE5D] transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+            href={`tel:${cleanPhone}`}
+            className="inline-flex items-center gap-2 px-6 py-3.5 rounded-[4px] bg-[#6a5d34] text-white font-label-technical text-xs uppercase tracking-wider font-bold hover:bg-[#7e6f3e] transition-colors"
           >
-            <span className="material-symbols-outlined text-lg">chat</span>
-            <span>WhatsApp Quote</span>
+            <span className="material-symbols-outlined text-base">call</span>
+            <span>Call Workshop</span>
           </a>
           <a
-            href={`tel:${phone.replace(/\s/g, '')}`}
-            className="inline-flex items-center gap-space-xs px-space-lg py-space-md rounded-full bg-surface-container-lowest text-on-surface font-label-technical text-xs uppercase tracking-wider hover:bg-surface-container transition-colors border border-outline-variant shadow-sm"
+            href={`https://wa.me/${cleanWhatsapp}?text=Hello%20Lathe%20Pattarai,%20I%20have%20a%20part%20to%20make.%20Can%20I%20share%20the%20drawing%20for%20a%20quote?`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-6 py-3.5 rounded-[4px] bg-white/10 text-white font-label-technical text-xs uppercase tracking-wider font-bold hover:bg-white/20 transition-colors border border-white/20"
           >
-            <span className="material-symbols-outlined text-primary text-lg">call</span>
-            <span>Direct Call</span>
+            <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+            <span>WhatsApp Drawing</span>
           </a>
         </div>
       </div>
